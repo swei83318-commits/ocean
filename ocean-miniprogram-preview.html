@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>潜行深蓝 — 海洋科普探索</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --abyss: #07182C;
+  --twilight: #0F2B46;
+  --ocean: #1A4A7A;
+  --surface: #2D7DD2;
+  --sonar: #00D4AA;
+  --coral: #FF6B6B;
+  --gold: #FFC857;
+  --foam: #E8F0F8;
+  --card: #FFFFFF;
+  --text: #1A2332;
+  --text-secondary: #5A6B7F;
+  --text-light: #8B9DC3;
+  --border: #E2E8F0;
+  --radius: 20px;
+  --shadow: 0 4px 24px rgba(7, 24, 44, 0.08);
+  --font-display: 'Space Grotesk', 'Noto Sans SC', system-ui, sans-serif;
+  --font-body: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: #F0F4F8;
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── App Shell ── */
+#app {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  background: #F0F4F8;
+}
+
+/* ── Header ── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, var(--abyss) 0%, var(--twilight) 60%, var(--ocean) 100%);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(7, 24, 44, 0.3);
+}
+
+.header-logo {
+  width: 32px; height: 32px;
+  background: radial-gradient(circle at 40% 60%, var(--sonar), var(--surface));
+  border-radius: 50%;
+  box-shadow: 0 0 16px rgba(0, 212, 170, 0.4);
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 12px rgba(0, 212, 170, 0.3); }
+  50% { box-shadow: 0 0 24px rgba(0, 212, 170, 0.6); }
+}
+
+.header-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFF;
+  letter-spacing: 2px;
+}
+
+/* ── Page Container ── */
+.pages {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 80px;
+  scroll-behavior: smooth;
+}
+
+.page {
+  display: none;
+  animation: fadeSlideIn 0.25s ease;
+}
+
+.page.active {
+  display: block;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Bottom Tab Bar ── */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: #FFF;
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 8px 0 env(safe-area-inset-bottom, 8px);
+  z-index: 100;
+  box-shadow: 0 -2px 12px rgba(7, 24, 44, 0.04);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+  font-size: 11px;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: color 0.2s;
+  border: none;
+  background: none;
+  font-family: var(--font-body);
+}
+
+.tab-item .tab-icon { font-size: 22px; line-height: 1; }
+.tab-item.active { color: var(--surface); font-weight: 600; }
+.tab-item:active { opacity: 0.7; }
+
+/* ── Cards ── */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 16px;
+  box-shadow: var(--shadow);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  background: linear-gradient(135deg, var(--surface) 0%, #1E6FC5 100%);
+  color: #FFF;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 36px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(45, 125, 210, 0.3);
+}
+
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(45, 125, 210, 0.4); }
+.btn-primary:active { transform: scale(0.98); opacity: 0.9; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--surface);
+  border: 2px solid var(--surface);
+  border-radius: 50px;
+  padding: 12px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover { background: rgba(45, 125, 210, 0.06); }
+.btn-outline:active { transform: scale(0.98); }
+
+.btn-sm {
+  padding: 8px 20px;
+  font-size: 13px;
+}
+
+/* ── Hero (Home) ── */
+.hero {
+  position: relative;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin: 12px 16px 4px;
+  border-radius: var(--radius);
+}
+
+.hero-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(175deg, #041020 0%, #0A2240 30%, #13477A 65%, #1E6FC5 100%);
+}
+
+.hero-rays {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(0, 212, 170, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 30% 100%, rgba(45, 125, 210, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 100%, rgba(45, 125, 210, 0.08) 0%, transparent 50%);
+}
+
+.hero-content {
+  position: relative; z-index: 2;
+  text-align: center;
+  padding: 20px;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 700;
+  color: #FFF;
+  letter-spacing: 3px;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px;
+}
+
+.hero-subtitle {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1px;
+}
+
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ── Age Selector ── */
+.age-selector {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.age-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 8px;
+  border-radius: 16px;
+  background: #F0F4F8;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-family: var(--font-body);
+}
+
+.age-card:hover { background: #E3EDF7; }
+.age-card.active {
+  background: linear-gradient(135deg, #E3F2FD, #D4F1F4);
+  border-color: var(--surface);
+  box-shadow: 0 2px 12px rgba(45, 125, 210, 0.15);
+}
+
+.age-icon { font-size: 36px; margin-bottom: 4px; }
+.age-label { font-size: 14px; font-weight: 600; color: var(--text); }
+.age-desc { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+
+/* ── Entry Grid ── */
+.entry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.entry-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 12px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #F8FAFD, #EDF4FC);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-family: var(--font-body);
+  text-align: center;
+}
+
+.entry-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(7, 24, 44, 0.08); }
+.entry-card:active { transform: scale(0.97); }
+
+.entry-icon { font-size: 40px; margin-bottom: 8px; }
+.entry-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.entry-desc { font-size: 11px; color: var(--text-light); }
+
+/* ── Daily Fact ── */
+.fun-fact-card {
+  background: linear-gradient(135deg, #FFFDF5, #FFF8E1);
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 12px;
+  border-left: 5px solid var(--gold);
+}
+
+.fact-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #B8860B;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.fact-text {
+  font-size: 14px;
+  color: #795548;
+  line-height: 1.7;
+}
+
+/* ── Quiz Selection ── */
+.topic-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.topic-card {
+  flex: 0 0 calc(33.333% - 7px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 6px;
+  border-radius: 14px;
+  background: #F0F4F8;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+
+.topic-card:hover { background: #E3EDF7; }
+.topic-card.active {
+  background: #E3F2FD;
+  border-color: var(--surface);
+}
+
+.topic-icon { font-size: 32px; margin-bottom: 4px; }
+.topic-label { font-size: 13px; font-weight: 600; color: var(--text); }
+
+/* ── Quiz Playing ── */
+.progress-wrap {
+  margin: 12px 16px;
+}
+
+.progress-bar-bg {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--surface), var(--sonar));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 6px;
+}
+
+.q-tag {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--surface);
+  background: #E3F2FD;
+  padding: 4px 14px;
+  border-radius: 30px;
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+
+.q-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #F8FAFD;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+  text-align: left;
+}
+
+.option:hover:not(.locked) { border-color: var(--surface); background: #EDF4FC; }
+
+.option-letter {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-right: 14px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.option.selected { border-color: var(--surface); background: #E3F2FD; }
+.option.selected .option-letter { background: var(--surface); color: #FFF; }
+.option.correct { border-color: var(--sonar); background: #E8FAF6; }
+.option.correct .option-letter { background: var(--sonar); color: #FFF; }
+.option.wrong { border-color: var(--coral); background: #FFF0EF; }
+.option.wrong .option-letter { background: var(--coral); color: #FFF; }
+
+.option-text {
+  flex: 1;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.option-mark {
+  font-size: 20px;
+  font-weight: 700;
+  margin-left: 10px;
+}
+
+.explanation {
+  margin-top: 20px;
+  padding: 18px;
+  background: #F8FAFD;
+  border-radius: 14px;
+  border-left: 4px solid var(--surface);
+  animation: fadeSlideIn 0.3s ease;
+}
+
+.exp-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.exp-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+
+.fun-fact-inline {
+  margin-top: 12px;
+  padding: 14px;
+  background: #FFF8E1;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #795548;
+  line-height: 1.6;
+}
+
+/* ── Quiz Result ── */
+.result-wrap { text-align: center; padding: 30px 0; }
+.result-icon { font-size: 80px; margin-bottom: 16px; }
+.result-score { font-family: var(--font-display); font-size: 52px; font-weight: 700; color: var(--text); }
+.result-label { font-size: 14px; color: var(--text-secondary); margin-bottom: 10px; }
+.result-msg { font-size: 17px; color: var(--surface); font-weight: 600; margin-bottom: 24px; }
+
+.result-stats {
+  display: flex;
+  justify-content: space-around;
+  padding: 20px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.stat-item { text-align: center; }
+.stat-num { font-family: var(--font-display); font-size: 32px; font-weight: 700; color: var(--text); }
+.stat-label { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+
+.result-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Explore ── */
+.sim-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 16px 12px;
+}
+
+.sim-tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px 6px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border: 2px solid transparent;
+  background: var(--card);
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+
+.sim-tab:hover { background: #F0F4F8; }
+.sim-tab.active {
+  background: linear-gradient(135deg, var(--surface), #1E6FC5);
+  color: #FFF;
+  box-shadow: 0 4px 14px rgba(45, 125, 210, 0.3);
+}
+
+.sim-canvas-wrap {
+  margin: 0 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: #0A1628;
+}
+
+.sim-canvas {
+  display: block;
+  width: 100%;
+  height: 320px;
+}
+
+.sim-info {
+  margin: 0 16px;
+  padding: 20px;
+  background: var(--card);
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.sim-info-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.sim-info-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.sim-info-text .hl {
+  color: var(--surface);
+  font-weight: 600;
+}
+
+.sim-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.sim-slider label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+.sim-slider input { flex: 1; accent-color: var(--surface); }
+
+.sim-stats-row {
+  display: flex;
+  justify-content: space-around;
+  padding: 16px 0;
+  margin-top: 14px;
+  background: #F8FAFD;
+  border-radius: 12px;
+}
+
+.sim-stat {
+  text-align: center;
+}
+
+.sim-stat-val {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--surface);
+}
+
+.sim-stat-label { font-size: 11px; color: var(--text-light); }
+
+.knowledge-line {
+  margin: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding: 20px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* ── Knowledge ── */
+.cat-scroll {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.cat-scroll::-webkit-scrollbar { display: none; }
+
+.cat-chip {
+  flex-shrink: 0;
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--card);
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+
+.cat-chip:hover { border-color: var(--surface); }
+.cat-chip.active {
+  background: linear-gradient(135deg, var(--surface), #1E6FC5);
+  color: #FFF;
+  border-color: transparent;
+}
+
+.knowledge-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 12px 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+
+.knowledge-card:hover { transform: translateY(-1px); }
+
+.kc-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.kc-tag {
+  font-size: 11px;
+  padding: 4px 12px;
+  border-radius: 30px;
+  font-weight: 600;
+}
+
+.kc-cat { background: #E3F2FD; color: var(--surface); }
+.kc-diff { background: #F3E5F5; color: #7B1FA2; }
+
+.kc-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+.kc-p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 10px;
+}
+
+.kc-funfact {
+  background: #FFF8E1;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 13px;
+  color: #795548;
+  line-height: 1.7;
+  margin-top: 10px;
+}
+
+.kc-source {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.knowledge-card .kc-title { cursor: default; }
+
+/* ── Empty State ── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-icon { font-size: 80px; margin-bottom: 16px; }
+.empty-msg { font-size: 18px; color: var(--text-secondary); margin-bottom: 8px; }
+.empty-tip { font-size: 13px; color: var(--text-light); }
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--abyss);
+  color: #FFF;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  box-shadow: 0 8px 24px rgba(7, 24, 44, 0.3);
+}
+
+.toast.show { opacity: 1; }
+
+/* ── History (from home) ── */
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--card);
+  padding: 16px 20px;
+  border-radius: 14px;
+  margin: 8px 16px;
+  box-shadow: 0 2px 8px rgba(7, 24, 44, 0.03);
+}
+
+.hi-left { display: flex; flex-direction: column; gap: 2px; }
+.hi-date { font-size: 14px; font-weight: 600; }
+.hi-topic { font-size: 11px; color: var(--text-light); }
+.hi-score {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.hi-score.great { color: var(--sonar); }
+.hi-score.good { color: var(--gold); }
+.hi-score.try { color: var(--coral); }
+
+/* ── Responsive ── */
+@media (min-width: 480px) {
+  #app { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .tab-bar {
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-radius: 0;
+  }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-logo"></div>
+    <span class="header-title">潜行深蓝</span>
+  </div>
+
+  <!-- Pages -->
+  <div class="pages" id="pages">
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-rays"></div>
+        <canvas class="hero-particles" id="heroCanvas"></canvas>
+        <div class="hero-content">
+          <div class="hero-title">潜行深蓝</div>
+          <div class="hero-subtitle">探索海洋的奥秘，成为海洋小达人</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">🎯 选择你的年龄段</div>
+        <div class="age-selector" id="ageSelector">
+          <button class="age-card active" data-age="7" onclick="selectAge(7, this)">
+            <span class="age-icon">🐠</span>
+            <span class="age-label">6-9 岁</span>
+            <span class="age-desc">入门探索者</span>
+          </button>
+          <button class="age-card" data-age="11" onclick="selectAge(11, this)">
+            <span class="age-icon">🐬</span>
+            <span class="age-label">10-12 岁</span>
+            <span class="age-desc">进阶探险家</span>
+          </button>
+          <button class="age-card" data-age="14" onclick="selectAge(14, this)">
+            <span class="age-icon">🔬</span>
+            <span class="age-label">13-14 岁</span>
+            <span class="age-desc">挑战研究者</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">🚀 开始探索</div>
+        <div class="entry-grid">
+          <button class="entry-card" onclick="switchTab('quiz')">
+            <span class="entry-icon">📝</span>
+            <span class="entry-title">开始答题</span>
+            <span class="entry-desc">测试海洋知识</span>
+          </button>
+          <button class="entry-card" onclick="switchTab('explore')">
+            <span class="entry-icon">🌊</span>
+            <span class="entry-title">动态模拟</span>
+            <span class="entry-desc">潮汐与洋流</span>
+          </button>
+          <button class="entry-card" onclick="switchTab('knowledge')">
+            <span class="entry-icon">📚</span>
+            <span class="entry-title">知识卡片</span>
+            <span class="entry-desc">趣味海洋百科</span>
+          </button>
+          <button class="entry-card" onclick="showHistory()">
+            <span class="entry-icon">🏆</span>
+            <span class="entry-title">答题记录</span>
+            <span class="entry-desc">查看我的成绩</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card" id="dailyFactCard">
+        <div class="section-title">💡 今日海洋小知识</div>
+        <div class="fun-fact-card">
+          <div class="fact-text" id="dailyFactText"></div>
+        </div>
+      </div>
+
+      <!-- History (hidden by default, shown when requested) -->
+      <div id="historySection" style="display:none;">
+        <div class="card">
+          <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span>🏆 答题记录</span>
+            <button class="btn-outline btn-sm" onclick="clearHistory()">清除记录</button>
+          </div>
+          <div id="historyStats" style="display:flex;justify-content:space-around;padding:16px 0;"></div>
+        </div>
+        <div id="historyList"></div>
+        <div style="text-align:center;padding:12px;">
+          <button class="btn-outline btn-sm" onclick="document.getElementById('historySection').style.display='none'">收起</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ -->
+    <div class="page" id="page-quiz">
+      <div id="quizSelection">
+        <div class="card">
+          <div class="section-title" style="text-align:center;">🌊 海洋知识挑战赛</div>
+          <div class="section-subtitle" style="text-align:center;">
+            当前难度：<strong id="quizDiffName"></strong> | 共 10-12 题
+          </div>
+          <div class="topic-grid" id="topicGrid">
+            <button class="topic-card active" data-topic="all" onclick="selectTopic('all', this)">
+              <span class="topic-icon">🎲</span><span class="topic-label">全部主题</span>
+            </button>
+            <button class="topic-card" data-topic="biology" onclick="selectTopic('biology', this)">
+              <span class="topic-icon">🐋</span><span class="topic-label">海洋生物</span>
+            </button>
+            <button class="topic-card" data-topic="geography" onclick="selectTopic('geography', this)">
+              <span class="topic-icon">🌍</span><span class="topic-label">海洋地理</span>
+            </button>
+            <button class="topic-card" data-topic="pollution" onclick="selectTopic('pollution', this)">
+              <span class="topic-icon">♻️</span><span class="topic-label">海洋环保</span>
+            </button>
+            <button class="topic-card" data-topic="ecosystem" onclick="selectTopic('ecosystem', this)">
+              <span class="topic-icon">🪸</span><span class="topic-label">海洋生态</span>
+            </button>
+          </div>
+          <button class="btn-primary" style="width:100%;margin-top:12px;" onclick="startQuiz()">开始挑战</button>
+        </div>
+      </div>
+
+      <div id="quizPlaying" style="display:none;">
+        <div class="progress-wrap">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+          <div class="progress-info">
+            <span id="progressCount"></span>
+            <span id="progressTopic"></span>
+          </div>
+        </div>
+        <div class="card" id="questionCard"></div>
+        <div style="padding: 0 16px 20px;" id="nextBtnWrap" hidden>
+          <button class="btn-primary" style="width:100%;" id="nextBtn" onclick="nextQuestion()">下一题</button>
+        </div>
+      </div>
+
+      <div id="quizResult" style="display:none;">
+        <div class="card">
+          <div class="result-wrap" id="resultContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPLORE -->
+    <div class="page" id="page-explore">
+      <div class="sim-tabs">
+        <button class="sim-tab active" data-sim="tide" onclick="switchSim('tide', this)">🌙 潮汐</button>
+        <button class="sim-tab" data-sim="current" onclick="switchSim('current', this)">🔄 洋流</button>
+        <button class="sim-tab" data-sim="wave" onclick="switchSim('wave', this)">🌊 波浪</button>
+        <button class="sim-tab" data-sim="depth" onclick="switchSim('depth', this)">📏 深度</button>
+      </div>
+      <div class="sim-canvas-wrap">
+        <canvas class="sim-canvas" id="simCanvas"></canvas>
+      </div>
+      <div class="sim-info" id="simInfo"></div>
+      <div class="knowledge-line" id="simFact"></div>
+    </div>
+
+    <!-- KNOWLEDGE -->
+    <div class="page" id="page-knowledge">
+      <div class="card" style="text-align:center;">
+        <div class="section-title">📚 海洋百科</div>
+        <div class="section-subtitle">点击卡片查看有趣的海洋知识</div>
+      </div>
+      <div class="cat-scroll" id="catScroll"></div>
+      <div id="knowledgeList"></div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-item active" data-tab="home" onclick="switchTab('home')">
+      <span class="tab-icon">🏠</span><span>首页</span>
+    </button>
+    <button class="tab-item" data-tab="quiz" onclick="switchTab('quiz')">
+      <span class="tab-icon">📝</span><span>答题</span>
+    </button>
+    <button class="tab-item" data-tab="explore" onclick="switchTab('explore')">
+      <span class="tab-icon">🌊</span><span>探索</span>
+    </button>
+    <button class="tab-item" data-tab="knowledge" onclick="switchTab('knowledge')">
+      <span class="tab-icon">📚</span><span>知识</span>
+    </button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  DATA: Question Bank (56 questions)
+// ═══════════════════════════════════════
+const questionBank = [
+  // 海洋生物 - 入门
+  { id:'bio_easy_01',topic:'biology',difficulty:0,type:'single',question:'世界上最大的动物是什么？',options:['蓝鲸','大象','恐龙','大白鲨'],answer:0,explanation:'蓝鲸是地球上现存最大的动物，成年蓝鲸可以长到30米以上，相当于三辆公交车首尾相连那么长！',funFact:'🐋 蓝鲸的舌头就和大象一样重！'},
+  { id:'bio_easy_02',topic:'biology',difficulty:0,type:'single',question:'海豚是怎么"看"东西的？',options:['用声波定位','用眼睛看','用触觉感知','靠同伴告诉它'],answer:0,explanation:'海豚会发出声波，碰到物体后反弹回来，海豚就能"听"出物体的位置——像蝙蝠一样！这叫回声定位。',funFact:'🐬 海豚睡觉时一半大脑醒着、一半大脑睡觉，轮流休息！'},
+  { id:'bio_easy_03',topic:'biology',difficulty:0,type:'single',question:'章鱼有几条腕足？',options:['8条','6条','10条','100条'],answer:0,explanation:'章鱼有8条腕足，每条腕足上都有吸盘，可以同时做不同的事情！',funFact:'🐙 章鱼的血液是蓝色的！'},
+  { id:'bio_easy_04',topic:'biology',difficulty:0,type:'single',question:'小海龟孵出来后第一件事是做什么？',options:['拼命爬向大海','找妈妈吃奶','躲进沙子里','飞起来'],answer:0,explanation:'小海龟破壳后会本能地爬向最亮的方向——自然环境中就是大海反射月光的方向。',funFact:'🐢 海龟妈妈产完蛋后就离开了，小海龟从没见过妈妈！'},
+  { id:'bio_easy_05',topic:'biology',difficulty:0,type:'truefalse',question:'所有鲨鱼都必须不停游泳，否则就会死掉。',options:['对','错'],answer:1,explanation:'错！有些鲨鱼（如护士鲨）可以通过嘴巴和鳃主动呼吸，可以趴在海底休息。',funFact:'🦈 鲨鱼已经在地球上生活了超过4亿年，比恐龙还要早！'},
+  { id:'bio_easy_06',topic:'biology',difficulty:0,type:'single',question:'水母的身体主要由什么组成？',options:['水','胶水','鱼肉','海草'],answer:0,explanation:'水母的身体95%以上都是水！被冲上岸后会很快消失——水分蒸发后就只剩薄膜了。',funFact:'🧪 水母没有心脏、没有大脑、也没有骨头！'},
+  // 海洋生物 - 进阶
+  { id:'bio_med_01',topic:'biology',difficulty:1,type:'single',question:'为什么深海鱼的身体通常扁扁的、软软的？',options:['适应高压环境','因为吃得少长不胖','为了在海底打洞','方便其他鱼按摩'],answer:0,explanation:'深海压力极大，每加深10米就增加约1个大气压。深海鱼进化出了柔软扁平的身体来适应。',funFact:'📐 马里亚纳海沟底部压力约1100个大气压，相当于大拇指上站一头大象！'},
+  { id:'bio_med_02',topic:'biology',difficulty:1,type:'single',question:'座头鲸的"歌声"有什么作用？',options:['求偶和交流','吓跑捕食者','麻醉猎物','帮助消化'],answer:0,explanation:'雄性座头鲸在繁殖季节发出复杂"歌曲"，用来吸引配偶。同一海域的座头鲸会唱同一首歌，还会逐年更新！',funFact:'🎵 座头鲸的歌声可以在水中传播数千公里！'},
+  { id:'bio_med_03',topic:'biology',difficulty:1,type:'single',question:'珊瑚是动物、植物还是矿物？',options:['动物（珊瑚虫）','植物（海藻）','矿物（石头）','半植物半动物'],answer:0,explanation:'珊瑚是由成千上万只微小的"珊瑚虫"组成的群体，是货真价实的动物。体内共生着虫黄藻。',funFact:'🏠 珊瑚礁覆盖不到1%的海洋面积，却养育了超过25%的海洋生物物种！'},
+  { id:'bio_med_04',topic:'biology',difficulty:1,type:'single',question:'企鹅为什么不会飞？',options:['翅膀进化成游泳鳍','翅膀被冻住了','吃太胖了','本来就会飞'],answer:0,explanation:'企鹅的翅膀进化为像船桨一样的鳍状肢，在水中产生强大推力——企鹅其实是在水下"飞行"！',funFact:'🏊 帝企鹅可以潜入500米深的水下，憋气超过20分钟！'},
+  { id:'bio_med_05',topic:'biology',difficulty:1,type:'truefalse',question:'海绵（海洋里的那种）是活的动物。',options:['对','错'],answer:0,explanation:'对！海绵是地球上最原始的多细胞动物之一。它们通过过滤海水中的微生物来进食。',funFact:'🧽 古人真的用海绵的"骨架"来洗澡！'},
+  { id:'bio_med_06',topic:'biology',difficulty:1,type:'single',question:'鲸鱼喷出的"水柱"实际是什么？',options:['呼出气体凝结的水雾','嘴里喷出的海水','专门储存的喷水','鲸鱼的眼泪'],answer:0,explanation:'鲸鱼用肺呼吸，温暖湿润的呼气遇到冷空气，水蒸气迅速凝结成水滴——就形成了"喷潮"。',funFact:'🌬️ 不同种类的鲸鱼喷出的气柱形状不同，科学家凭此就能判断种类！'},
+  // 海洋生物 - 挑战
+  { id:'bio_hard_01',topic:'biology',difficulty:2,type:'single',question:'海洋"生物荧光"和"生物发光"有什么区别？',options:['荧光需外部光源，发光是自身化学反应','荧光是动物，发光是植物','荧光白天，发光晚上','没有区别'],answer:0,explanation:'生物发光是体内荧光素酶催化产生光——不需要外部光源。生物荧光则是吸收特定波长光再重新发射——需要外部光源。',funFact:'💡 大约76%的深海动物具有生物发光能力！'},
+  { id:'bio_hard_02',topic:'biology',difficulty:2,type:'single',question:'海洋中最大的氧气来源是什么？',options:['浮游植物','海藻和海草','大气溶解','大型海藻林'],answer:0,explanation:'海洋浮游植物贡献了地球约50-80%的氧气产量，远超所有热带雨林的总和。',funFact:'🫧 你每呼吸两口氧气，就有一口来自海洋！'},
+  { id:'bio_hard_03',topic:'biology',difficulty:2,type:'single',question:'深海热泉喷口附近为何有丰富生物群落（没有阳光）？',options:['化能合成细菌利用硫化氢制造有机物','热泉热量融化海水释放营养','深海鱼只需要热量','热泉水含蛋白质'],answer:0,explanation:'化能合成细菌利用喷口释放的硫化氢作为能源，将CO₂合成有机物——支撑了整个不依赖阳光的生态系统。',funFact:'🌋 深海热泉喷口温度可达400°C，但周围海水只有2°C！'},
+  // 海洋地理 - 入门
+  { id:'geo_easy_01',topic:'geography',difficulty:0,type:'single',question:'地球表面被海洋覆盖的面积大约有多少？',options:['约七成（70%）','约三成（30%）','约一半（50%）','约九成（90%）'],answer:0,explanation:'地球表面大约71%被海洋覆盖！从太空看，地球是一颗美丽的蓝色星球。',funFact:'🌍 如果地球表面完全平整，整个地球将被约2.7公里深的海水覆盖！'},
+  { id:'geo_easy_02',topic:'geography',difficulty:0,type:'single',question:'海水为什么是咸的？',options:['雨水冲刷岩石带入盐分','海里的鱼产盐','月亮倒的盐','天生就咸'],answer:0,explanation:'雨水溶解岩石中的矿物质（包括盐），河流带入海洋。海水蒸发只蒸发水，盐留在海里——亿万年来盐分不断累积。',funFact:'🧂 如果海水全部蒸发，留下的盐可覆盖地球表面约45米厚！'},
+  { id:'geo_easy_03',topic:'geography',difficulty:0,type:'single',question:'潮汐（涨潮退潮）主要由什么引起？',options:['月球引力','海风','地球自转','太阳热量'],answer:0,explanation:'潮汐主要受月球引力影响。月球拉着海水，正对月球和背对月球两侧同时涨潮。',funFact:'🌊 太阳也会影响潮汐——新月满月时潮汐特别大，叫"大潮"！'},
+  { id:'geo_easy_04',topic:'geography',difficulty:0,type:'single',question:'世界上最深的海沟叫什么？',options:['马里亚纳海沟','日本海沟','秘鲁海沟','汤加海沟'],answer:0,explanation:'马里亚纳海沟最深处约11,000米，把珠穆朗玛峰放进去，峰顶还在水下约2公里。',funFact:'🏔️ 到过马里亚纳海沟底部的人比上过月球的人还少！'},
+  { id:'geo_easy_05',topic:'geography',difficulty:0,type:'single',question:'波浪是怎么形成的？',options:['风把能量传给海水','海底火山','鱼群游动','地球自转'],answer:0,explanation:'风把能量传递给海水形成波浪。风越大、吹得越远，波浪越高。',funFact:'🌬️ 台风中心的巨浪可以高达15米以上，差不多五层楼高！'},
+  { id:'geo_easy_06',topic:'geography',difficulty:0,type:'truefalse',question:'四大洋中，北冰洋是最小的。',options:['对','错'],answer:0,explanation:'对！从大到小：太平洋>大西洋>印度洋>北冰洋。北冰洋面积只有太平洋的约1/10。',funFact:'🧊 北冰洋大部分海面常年被海冰覆盖，但近年来冰层在快速减少。'},
+  // 海洋地理 - 进阶
+  { id:'geo_med_01',topic:'geography',difficulty:1,type:'single',question:'洋流对地球气候最重要的作用是什么？',options:['传送带般把热量从赤道送往两极','给鲸鱼提供迁徙通道','搬运沙子','让海水变咸'],answer:0,explanation:'洋流是地球的"热量输送系统"，暖流把赤道热量带向高纬，寒流把冷水送回赤道。',funFact:'🔄 一个完整的"大洋传送带"走一圈大约需要1,000年！'},
+  { id:'geo_med_02',topic:'geography',difficulty:1,type:'single',question:'海啸和普通海浪的本质不同是什么？',options:['海啸波长极长（数百公里），由海底地震引起','海啸只是更大的普通海浪','海啸由台风引起','海啸是月球引力异常产生'],answer:0,explanation:'海啸由海底地震引发，波长可达数百公里。在深海中几乎察觉不到，靠近海岸时能量聚集可形成数十米水墙。',funFact:'⚠️ 2004年印度洋海啸在深海的传播速度接近喷气式飞机（约800km/h）！'},
+  { id:'geo_med_03',topic:'geography',difficulty:1,type:'single',question:'死海为什么叫"死海"？',options:['盐度极高（约34%），生物无法生存','海里生物都是僵尸','靠近地狱','有毒气'],answer:0,explanation:'死海是内陆盐湖，盐度约34%，是普通海水的近10倍。海洋生物进入会立即脱水死亡。但极高盐度带来极高浮力。',funFact:'🏊 在死海游泳不是"游"的，是"躺"的——根本沉不下去！'},
+  { id:'geo_med_04',topic:'geography',difficulty:1,type:'single',question:'海水在不同深度颜色为什么不同？',options:['水对不同波长光吸收不同——红光先消失，蓝光穿透最深','不同深度盐度不同','海底颜色反射','不同深度浮游生物染色'],answer:0,explanation:'红、橙、黄色光依次在浅层被吸收，只有蓝光能穿透到200米以上。深海因此呈现深蓝色。',funFact:'🌈 在水下约30米深度，伤口流出的血看起来是绿色的！'},
+  { id:'geo_med_05',topic:'geography',difficulty:1,type:'truefalse',question:'北极和南极的冰融化都会导致海平面上升。',options:['对','错'],answer:1,explanation:'错！北极冰是漂浮海冰，融化不增加海平面（像杯子里冰块融化）。南极冰在陆地上，融化流入海洋才会导致海平面上升。',funFact:'🧊 如果南极冰盖完全融化，全球海平面将上升约58米！'},
+  // 海洋地理 - 挑战
+  { id:'geo_hard_01',topic:'geography',difficulty:2,type:'single',question:'什么是"温盐环流"（大洋传送带）？由什么驱动？',options:['温度盐度差异驱动全球深层洋流','台风搅拌','科里奥利力','潮汐搅拌'],answer:0,explanation:'温盐环流由温度和盐度差异驱动。北大西洋冷咸水下沉，在深层流向赤道，表层暖水回流极地——形成全球传送带。',funFact:'🔬 温盐环流如果显著减弱，可能引发剧烈的气候变化！'},
+  { id:'geo_hard_02',topic:'geography',difficulty:2,type:'single',question:'海洋酸化如何发生？与大气CO₂有什么关系？',options:['CO₂溶于海水形成碳酸→降低pH→影响钙化生物','酸雨落入海洋','海藻死亡释放酸性物质','海底火山释放硫酸'],answer:0,explanation:'人类排放的CO₂约30%被海洋吸收。CO₂溶解形成碳酸，释放氢离子导致pH下降——就是海洋酸化。',funFact:'📉 自工业革命以来，海洋表层pH已从8.2降至8.1——酸度增加了约30%！'},
+  // 海洋环保 - 入门
+  { id:'pol_easy_01',topic:'pollution',difficulty:0,type:'single',question:'海洋里最多的垃圾是什么？',options:['塑料垃圾','玻璃瓶','木头','铁罐'],answer:0,explanation:'塑料占海洋垃圾80%以上。一个塑料瓶在海里可能需要450年才能分解。',funFact:'🗑️ 每年约800万吨塑料排入海洋，相当于每分钟倒一卡车塑料！'},
+  { id:'pol_easy_02',topic:'pollution',difficulty:0,type:'single',question:'吃鱼可能会吃到什么不该吃的东西？',options:['微塑料进入食物链','鱼的眼泪','海盐粒','海藻种子'],answer:0,explanation:'塑料在海洋中碎裂成微塑料（<5mm），被小鱼吃掉，大鱼吃小鱼，最终可能出现在餐桌上。',funFact:'🔍 科学家已经在人类血液和胎盘中发现了微塑料！'},
+  { id:'pol_easy_03',topic:'pollution',difficulty:0,type:'single',question:'我们能做哪件小事帮助保护海洋？',options:['少用一次性塑料','把垃圾扔进海里','用更多塑料袋','不管它'],answer:0,explanation:'少用一次性塑料（塑料袋/瓶/吸管），自带水杯和购物袋——每个人都能帮忙。',funFact:'🌱 一个可重复使用的水杯，一年可省下约365个塑料瓶！'},
+  { id:'pol_easy_04',topic:'pollution',difficulty:0,type:'truefalse',question:'过度捕捞就是人类捕捞鱼类的速度超过鱼类繁殖的速度。',options:['对','错'],answer:0,explanation:'对！目前全球约34%的渔业资源被过度捕捞。蓝鳍金枪鱼的数量已减少超过95%。',funFact:'🐟 过度捕捞是海洋生物多样性面临的最大威胁之一。'},
+  // 海洋环保 - 进阶
+  { id:'pol_med_01',topic:'pollution',difficulty:1,type:'single',question:'海洋"死亡区"（缺氧区）是怎么形成的？',options:['化肥流入→藻类疯长→死亡分解耗氧','海底火山耗氧','阳光不足不产氧','垃圾挡住空气'],answer:0,explanation:'农业化肥通过河流入海造成富营养化，藻类疯长后死亡被细菌分解，消耗大量溶解氧——形成"死区"。全球已有超400个海洋死区。',funFact:'💀 墨西哥湾的死区面积有时超过20,000平方公里——相当于整个北京市！'},
+  { id:'pol_med_02',topic:'pollution',difficulty:1,type:'single',question:'什么是"幽灵渔具"？',options:['被遗弃的渔网继续捕杀海洋生物','捕幽灵的渔具','透明渔具','晚上才出现的渔具'],answer:0,explanation:'幽灵渔具是被遗弃在海洋中的渔网、鱼笼，会继续缠绕和杀死海洋生物年复一年。占海洋塑料污染的约10%。',funFact:'🕸️ 一张被遗弃的大型流网可长达数公里，在海上漂荡数十年！'},
+  { id:'pol_med_03',topic:'pollution',difficulty:1,type:'single',question:'石油泄漏对海洋生物最大的危害？',options:['覆盖海鸟羽毛+阻碍气体交换+毒性入食物链','石油爆炸烧死鱼','臭味熏跑鱼','染黑海水无光'],answer:0,explanation:'石油泄漏多方面危害：海鸟羽毛沾油失去防水保温而冻死；油膜阻碍海气交换；有毒物质通过食物链富集。',funFact:'🛢️ 2010年墨西哥湾漏油事件释放了约490万桶原油！'},
+  { id:'pol_med_04',topic:'pollution',difficulty:1,type:'truefalse',question:'设立海洋保护区对恢复鱼类种群没有效果。',options:['对','错'],answer:1,explanation:'错！大量科学证明严格海洋保护区可有效恢复鱼类种群，保护区周边渔业产量反而提高——"溢出效应"。',funFact:'🐠 大堡礁海洋公园设立后，部分区域鱼类数量在几年内翻了好几倍！'},
+  // 海洋环保 - 挑战
+  { id:'pol_hard_01',topic:'pollution',difficulty:2,type:'single',question:'什么是"生物放大"？污染物如何通过食物链影响顶级捕食者？',options:['污染物沿食物链浓度逐级升高，顶级捕食者体内最高','鱼的体型变大','鱼的数量增加','微生物分解污染物'],answer:0,explanation:'持久性有机污染物难降解、易溶于脂肪。浮游生物→小鱼→大鱼→顶级捕食者，浓度逐级升高可达海水中的数百万倍。',funFact:'🧪 有些人造化学物质禁用几十年后，仍能在深海生物体内检测到！'},
+  { id:'pol_hard_02',topic:'pollution',difficulty:2,type:'single',question:'气候变化对海洋最直接的两个物理影响是什么？',options:['海水变暖+海平面上升 和 海洋酸化','海变红+浪变高','海水变甜+洋流加速','海底抬升+面积扩大'],answer:0,explanation:'两个直接影响：海水温度上升（热膨胀）+冰盖融化导致海平面上升；海洋吸收过量CO₂导致pH下降（酸化）。',funFact:'📈 过去100年全球海平面上升了约20厘米，且上升速度在加快！'},
+  // 海洋生态 - 入门
+  { id:'eco_easy_01',topic:'ecosystem',difficulty:0,type:'single',question:'珊瑚礁被称为海洋中的什么？',options:['热带雨林','沙漠','草原','冰山'],answer:0,explanation:'珊瑚礁被称为"海洋中的热带雨林"！虽只占海洋不到1%，但养育了超过25%的海洋生物物种。',funFact:'🏙️ 一个健康的珊瑚礁在百米范围内可容纳数千个物种！'},
+  { id:'eco_easy_02',topic:'ecosystem',difficulty:0,type:'single',question:'红树林长在哪里？',options:['海陆交界的潮间带','深海海底','高山上','沙漠里'],answer:0,explanation:'红树林生长在热带海岸潮间带，涨潮时被淹、退潮时露出。根像"高跷"一样露出水面。',funFact:'🦀 红树林是小螃蟹小鱼的"幼儿园"！'},
+  { id:'eco_easy_03',topic:'ecosystem',difficulty:0,type:'single',question:'海洋食物链最底层是什么？',options:['浮游植物','小虾米','沙子','细菌'],answer:0,explanation:'浮游植物是海洋食物链的基础！这些微小的植物通过光合作用制造有机物，支撑了整个海洋生命。',funFact:'🔬 一勺海水中可能有数百万个浮游植物！'},
+  { id:'eco_easy_04',topic:'ecosystem',difficulty:0,type:'truefalse',question:'海带森林是由巨型海藻组成的水下"森林"。',options:['对','错'],answer:0,explanation:'对！巨藻可以长到50米以上，以每天几十厘米的速度生长，形成茂密的"水下森林"。',funFact:'🌿 巨藻是世界上生长最快的生物之一——一天可长60厘米！'},
+  { id:'eco_easy_05',topic:'ecosystem',difficulty:0,type:'single',question:'海獭为什么对海带森林很重要？',options:['海獭吃海胆保护海带','海獭种海带','叫声让海带生长','带来养分'],answer:0,explanation:'海獭是海带森林的"守护者"！海胆吃海带根部，海獭吃海胆控制其数量——这叫"关键种"。',funFact:'🦦 海獭是少数会使用工具的海洋动物——它们用石头敲开贝壳！'},
+  // 海洋生态 - 进阶
+  { id:'eco_med_01',topic:'ecosystem',difficulty:1,type:'single',question:'珊瑚白化是什么？为什么会发生？',options:['水温升高→珊瑚排出共生藻→变白→持续高温则死亡','太阳晒褪色了','年纪大了变白','小鱼吃掉了颜色'],answer:0,explanation:'水温异常升高时珊瑚受胁迫排出共生虫黄藻，失去颜色变白。如果高温在几周内结束可恢复，持续则会饿死。',funFact:'🔥 2016-2017年大堡礁经历了最严重白化，约2/3珊瑚受影响！'},
+  { id:'eco_med_02',topic:'ecosystem',difficulty:1,type:'single',question:'"营养级联"下面哪个例子是正确的？',options:['虎鲸吃海獭→海胆暴增→海带被吃光→生态崩溃','海鸥多吃鱼→海水变清','螃蟹多了→沙子变多','珊瑚多了→海水变冷'],answer:0,explanation:'营养级联指顶端捕食者通过捕食中层消费者间接影响底层生产者。经典例子：虎鲸→海獭→海胆→巨藻林。',funFact:'🔗 在健康生态系统中，顶级捕食者往往是最重要的"守门员"！'},
+  { id:'eco_med_03',topic:'ecosystem',difficulty:1,type:'single',question:'鲸鱼死后沉入海底形成的特殊生态系统叫什么？',options:['鲸落（Whale Fall）','鲸沉','鲸墓','鲸礁'],answer:0,explanation:'鲸落是一头鲸死后沉入深海形成的独特生态系统，可支撑深海生物群落长达50-100年。',funFact:'💀 一次鲸落可为一个深海群落提供长达50-100年的"食物"！'},
+  { id:'eco_med_04',topic:'ecosystem',difficulty:1,type:'single',question:'为什么红树林对保护海岸线很重要？',options:['根系减弱海浪+防止侵蚀+过滤污染物','漂亮吸引游客','生产木材','把海水变淡水'],answer:0,explanation:'红树林根系像海绵吸收台风大浪能量，截留泥沙和污染物。有红树林保护的村庄在台风中受损更少。',funFact:'🌪️ 2004年印度洋海啸中，有健康红树林的海岸人员伤亡明显更低！'},
+  { id:'eco_med_05',topic:'ecosystem',difficulty:1,type:'truefalse',question:'深海生态系统完全依赖来自太阳的能量。',options:['对','错'],answer:1,explanation:'错！深海热泉生态系统是例外——化能合成细菌利用地球内部化学能代替太阳能进行初级生产。',funFact:'🔋 深海热泉证明：生命可以在完全没有阳光的世界里繁荣！'},
+  // 海洋生态 - 挑战
+  { id:'eco_hard_01',topic:'ecosystem',difficulty:2,type:'single',question:'为什么生物多样性对海洋生态系统的"韧性"很重要？',options:['功能冗余：一种生物受影响时其他物种可填补生态功能','稀有物种能治癌症','多样性只对陆地重要','越多种类越美观'],answer:0,explanation:'功能冗余是生态韧性的关键：存在多种执行相似功能的物种时，如果某一物种减少，其他物种可"接替"其角色。',funFact:'🧬 珊瑚礁是地球上单位面积生物多样性最高的生态系统之一！'},
+  { id:'eco_hard_02',topic:'ecosystem',difficulty:2,type:'single',question:'"海洋生物泵"在碳循环中起什么作用？',options:['浮游植物固定CO₂→死亡后有机碳沉降深海→长期封存碳','生物把碳从深海抽到海面','鲸鱼喷水柱有碳','机械泵让海水流动'],answer:0,explanation:'海洋生物泵是全球碳循环关键：浮游植物吸收CO₂转化为有机碳，死亡后残骸沉降到深海被封存数百年至数千年。',funFact:'❄️ "海洋雪"不是真的雪，而是持续沉降的有机物碎屑——深海生物的主要食物！'},
+  { id:'eco_hard_03',topic:'ecosystem',difficulty:2,type:'single',question:'什么是"极地放大效应"？',options:['冰雪融化暴露暗色海面→吸收更多热量→加速融化（正反馈）','极地太阳特别烈','极地离太阳更近','洋流加速聚热'],answer:0,explanation:'冰雪反射太阳辐射（反照率高）。融化后暴露暗色海面吸收更多热量→进一步升温→更多融化。北极变暖速度是全球平均的2-4倍。',funFact:'🐻‍❄️ 如果夏季北极海冰完全消失，北极熊将失去捕猎海豹的平台！'},
+  // 综合
+  { id:'mix_med_01',topic:'ecosystem',difficulty:1,type:'single',question:'以下哪种行为最能体现海洋保护理念？',options:['设立社区参与的海洋保护区','把所有海洋生物关进水族馆','禁止所有人去海边','把海洋生物转移到淡水'],answer:0,explanation:'最有效的保护往往是让当地社区参与进来——"社区共管"让渔民也成为保护工作的一部分。',funFact:'🤝 菲律宾阿波岛渔民自建保护区让鱼类数量在20年内增长了数倍！'},
+  { id:'mix_easy_01',topic:'biology',difficulty:0,type:'single',question:'看到小海龟孵化后爬向大海，你应该怎么做？',options:['保持安静观看，不碰不用闪光灯','抓起来扔进海里','带回家当宠物','大声欢呼'],answer:0,explanation:'小海龟需要自己完成"冲向大海"的旅程，记住出生地磁场特征成年后回来产卵。人为干扰会破坏这个过程。',funFact:'🏖️ 海龟妈妈几十年后还会回到自己出生的同一片海滩产卵！'}
+];
+
+const topicNames = { biology:'海洋生物', geography:'海洋地理', pollution:'海洋环保', ecosystem:'海洋生态' };
+const diffNames = ['🌊 入门', '🐬 进阶', '🔬 挑战'];
+const optionLetters = ['A', 'B', 'C', 'D'];
+
+// ═══════════════════════════════════════
+//  KNOWLEDGE CARDS
+// ═══════════════════════════════════════
+const knowledgeCards = [
+  { id:1,cat:'biology',catName:'海洋生物',diff:'入门',title:'蓝鲸——地球上最大的动物',ps:['蓝鲸是地球上现存最大的动物，成年蓝鲸可以长到30米以上——相当于三辆公交车首尾相连那么长！','蓝鲸的舌头就和大象一样重，它的心脏有小型汽车那么大。蓝鲸虽然体型巨大，但主要吃磷虾，一天能吃4吨。'],fun:'蓝鲸的叫声是地球上最响亮的声音之一，在水中可以传播数千公里！',src:'海洋科学知识库 - 鲸类的迁徙与智慧'},
+  { id:2,cat:'biology',catName:'海洋生物',diff:'入门',title:'海豚——海洋中的"声波侠"',ps:['海豚用"回声定位"来"看"东西。它们发出声波，碰到物体后反弹回来，通过解析回波知道前方物体的位置、大小和形状。','海豚特别聪明——在镜子前能认出自己，只有极少数动物有这种自我意识。睡觉时一半大脑休息、一半大脑保持清醒！'],fun:'海豚有名字——它们用独特的口哨声来称呼彼此！',src:'海洋科学知识库 - 鲸类的迁徙与智慧'},
+  { id:3,cat:'biology',catName:'海洋生物',diff:'进阶',title:'座头鲸的"流行歌曲"',ps:['雄性座头鲸在繁殖季节发出复杂、重复的"歌曲"，一首歌可持续30分钟以上。同一片海域所有雄鲸会唱同一首歌。','更神奇的是，这首歌每年都在变化——就像"年度流行榜"。某族群创作的歌曲可跨越数千公里被远方族群学会。这是人类之外极少数"累积文化"的例子。'],fun:'座头鲸的歌声中甚至能分辨出类似押韵的结构——像诗歌一样！',src:'海洋科学知识库 - 鲸类的迁徙与智慧'},
+  { id:4,cat:'biology',catName:'海洋生物',diff:'进阶',title:'深海中的"灯光秀"——生物发光',ps:['超过76%的深海动物能自己发光！这种能力叫"生物发光"，是体内荧光素酶催化产生的冷光——几乎不产热。','发光在深海中是生存语言：鮟鱇鱼用发光器钓鱼，鱿鱼喷出发光墨汁逃跑，腹部发光消除剪影让下方捕食者看不到自己。'],fun:'鮟鱇鱼雌性比雄性大很多倍——雄性找到雌性后会"寄生"在她身体上融为一体！',src:'海洋科学知识库 - 深海发光生物'},
+  { id:5,cat:'biology',catName:'海洋生物',diff:'挑战',title:'巨型管蠕虫——没有嘴也没有肠子',ps:['1977年阿尔文号潜水器在2500米深处发现深海热液喷口。"巨型管蠕虫"长达2.4米，没有口、没有消化道、没有肛门。','它们完全依赖体内的化能合成细菌提供营养：细菌利用硫化氢作为能源合成有机物。这是动物界独一无二的——体内有"细菌农场"生产食物。'],fun:'化能合成颠覆了"万物生长靠太阳"——深海热泉证明了生命可以不依赖太阳！',src:'海洋科学知识库 - 深海热液喷口化学'},
+  { id:6,cat:'geography',catName:'海洋地理',diff:'入门',title:'马里亚纳海沟——地球最深处',ps:['位于西太平洋，最深处"挑战者深渊"约10,994米。把整座珠穆朗玛峰（8,848m）放进去，峰顶还在水下约2,000米。','底部水压超过1,000个大气压——相当于大拇指上放一头大象！但科学家在那里发现了狮子鱼、巨型端足类，甚至塑料垃圾。'],fun:'去过马里亚纳海沟底部的人比登过月球的人还少——大约只有27人！',src:'海洋科学知识库 - 马里亚纳海沟'},
+  { id:7,cat:'geography',catName:'海洋地理',diff:'入门',title:'海水为什么是咸的？',ps:['海水盐分主要来自岩石风化。雨水冲刷陆地溶解岩石中的矿物质（包括盐），河流将这些矿物质带入海洋。','海水蒸发只蒸水不蒸盐——亿万年来盐分不断累积。这个循环已运行约38亿年——几乎和地球本身一样古老。'],fun:'如果海水全部蒸发，留下的盐可覆盖整个地球表面约45米厚！',src:'海洋科学知识库 - 海水盐分的来源'},
+  { id:8,cat:'physics',catName:'海洋物理',diff:'进阶',title:'洋流——地球的"血液循环"',ps:['海洋中存在连接全球所有大洋的深层环流——"大洋传送带"。暖流将赤道热量送往高纬，寒流将冷水送回赤道。','它对全球气候至关重要：墨西哥湾流给欧洲"送温暖"，让伦敦远比同纬度的加拿大温暖宜居。一个完整循环约需1,000年。'],fun:'秘鲁渔场之所以是世界最大渔场之一，全靠洋流从深海带来的丰富营养盐！',src:'海洋科学知识库 - 洋流系统与全球传送带'},
+  { id:9,cat:'physics',catName:'海洋物理',diff:'入门',title:'潮汐——月球拉动的海洋',ps:['潮汐主要由月球引力引起。月球拉着海水——正对月球一面隆起（涨潮），背面因离心力也涨潮。','大多数沿海地区一天有两次涨潮和退潮。太阳也会影响潮汐——新月和满月时潮汐特别大，叫"大潮"。'],fun:'加拿大芬迪湾的潮差可达16.3米——差不多五层楼高！',src:'海洋科学知识库 - 潮汐的成因'},
+  { id:10,cat:'pollution',catName:'海洋环保',diff:'入门',title:'海洋中的塑料——看不见的危机',ps:['每年约800万吨塑料排入海洋，相当于每分钟倒一卡车的塑料。这些塑料不会消失，只会碎成越来越小的微塑料。','微塑料被浮游动物吃下，通过食物链层层传递，最终可能出现在我们吃的大鱼甚至我们自己身体里。马里亚纳海沟底部也发现了塑料。'],fun:'一个普通塑料瓶在海洋中需要约450年才能分解——比人的寿命长好几倍！',src:'海洋科学知识库 - 海洋塑料污染'},
+  { id:11,cat:'pollution',catName:'海洋环保',diff:'进阶',title:'"幽灵渔具"——海中的永恒陷阱',ps:['幽灵渔具是被遗弃在海里的渔网、鱼笼和鱼线。这些渔具会继续"捕猎"——缠绕和杀死鱼类、海龟、海鸟和鲸类年复一年。','一张被遗弃的大型流网可长达数公里，在海上漂荡数十年。占海洋塑料污染的约10%。被缠住的动物挣扎声又会吸引更多动物——恶性循环。'],fun:'大太平洋垃圾带的塑料垃圾中约46%的质量来自废弃渔网！',src:'海洋科学知识库 - 海洋塑料污染'},
+  { id:12,cat:'pollution',catName:'海洋环保',diff:'挑战',title:'海洋酸化——CO₂的隐藏代价',ps:['海洋吸收了人类排放CO₂的约30%——CO₂溶于海水形成碳酸，释放氢离子，导致pH下降——"海洋酸化"。','自工业革命以来，海洋表层pH从8.2降至8.1。看似只差0.1，但pH是对数尺度——代表酸度增加了约26%。更酸的海水让珊瑚、贝类更难形成外壳。'],fun:'如果人类血液pH变化0.1，你会在几分钟内昏迷——海洋的"酸中毒"严重得多。',src:'海洋科学知识库 - 海洋酸化机制'},
+  { id:13,cat:'ecosystem',catName:'海洋生态',diff:'入门',title:'珊瑚——动物还是植物？',ps:['珊瑚看起来像彩色石头或花朵，但它们其实是动物！成千上万只微小的"珊瑚虫"聚居形成了珊瑚。','珊瑚虫体内住着虫黄藻——一种单细胞藻类。虫黄藻通过光合作用给珊瑚提供约90%的能量，也赋予珊瑚鲜亮颜色。'],fun:'珊瑚礁只占海洋面积不到1%，但养育了超过25%的海洋生物物种！',src:'海洋科学知识库 - 珊瑚共生系统'},
+  { id:14,cat:'ecosystem',catName:'海洋生态',diff:'进阶',title:'珊瑚白化——美丽消失的背后',ps:['当海水温度异常升高（哪怕只1-2°C），珊瑚受胁迫排出共生虫黄藻。失去藻类的珊瑚变白——这就是"白化"。','白化的珊瑚没有死！如果水温在2-4周内回落，珊瑚可以恢复。如果高温持续超过4-8周，失去90%能量来源的珊瑚就会饿死。2023-2024年第四次全球白化已被确认。'],fun:'珊瑚在每年满月后的夜晚"集体婚礼"——数十种珊瑚同时释放精子和卵子，形成海底"暴风雪"！',src:'海洋科学知识库 - 珊瑚白化成因与应对'},
+  { id:15,cat:'ecosystem',catName:'海洋生态',diff:'入门',title:'鲸落——死亡中的生命奇迹',ps:['当一头鲸在深海中死去，身体缓缓沉入海底，会创造一个全新生态系统——"鲸落"（Whale Fall）。','这个过程持续数十年：先是食腐动物吃掉软组织，然后蠕虫占据骨骼，最后细菌利用骨骼脂质产生能量——不依赖阳光的微型生态系统就此诞生。'],fun:'一鲸落，万物生——一头死鲸带来的养分相当于这里两千年间自然沉降有机物的总和！',src:'海洋科学知识库 - 鲸类的迁徙与智慧'},
+  { id:16,cat:'physics',catName:'海洋物理',diff:'挑战',title:'ENSO——太平洋的"三年之痒"',ps:['ENSO（厄尔尼诺-南方涛动）是地球上最强的年际气候波动。厄尔尼诺年份，太平洋暖水从西边回流到东边——太平洋"感冒"，全世界"打喷嚏"。','拉尼娜则是厄尔尼诺的反相：信风异常增强，暖水堆积更极端。周期通常为2-7年。2023-24年强厄尔尼诺叠加全球变暖，使2023年成为有记录以来最热年份。'],fun:'"厄尔尼诺"意思是"圣婴"——温暖海水常在圣诞节前后抵达秘鲁，被渔民比作耶稣圣婴！',src:'海洋科学知识库 - 厄尔尼诺与拉尼娜'}
+];
+
+const dailyFacts = [
+  '🐋 蓝鲸是地球上现存最大的动物，可以长到30米以上——相当于三辆公交车首尾相连！',
+  '🌊 海洋覆盖了地球表面约71%的面积，从太空看地球是一颗蓝色星球。',
+  '🐙 章鱼的血液是蓝色的！因为它的血液里含的是血蓝蛋白（含铜），而不是血红素（含铁）。',
+  '🦈 鲨鱼已经在地球上生活了超过4亿年，比恐龙还要早！',
+  '🌿 巨藻是世界上生长最快的生物之一——一天可以长60厘米！',
+  '🐢 海龟妈妈产完蛋后就离开了，小海龟从没见过妈妈。',
+  '🧪 水母的身体里95%以上都是水——没有心脏、没有大脑、也没有骨头！',
+  '🐬 海豚睡觉时一半大脑醒着、一半大脑睡觉，轮流休息！',
+  '🫧 你每呼吸两口氧气，就有一口来自海洋！',
+  '🌋 深海热泉喷口温度可达400°C，但周围海水只有2°C！'
+];
+
+// ═══════════════════════════════════════
+//  APP STATE
+// ═══════════════════════════════════════
+const state = {
+  userAge: 8,
+  difficulty: 0,
+  currentTab: 'home',
+  quizState: 'idle', // idle|playing|finished
+  selectedTopic: 'all',
+  questions: [],
+  currentIndex: 0,
+  selectedOption: -1,
+  answered: false,
+  correctCount: 0,
+  activeSim: 'tide',
+};
+
+// ═══════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════
+function switchTab(tab) {
+  state.currentTab = tab;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab-item[data-tab="${tab}"]`).classList.add('active');
+
+  document.getElementById('pages').scrollTop = 0;
+
+  if (tab === 'quiz') resetQuizUI();
+  if (tab === 'explore') { initSimCanvas(); startSimLoop(); }
+  if (tab === 'knowledge') renderKnowledge();
+}
+
+// ═══════════════════════════════════════
+//  AGE SELECTION
+// ═══════════════════════════════════════
+function selectAge(age, el) {
+  state.userAge = age;
+  state.difficulty = age <= 9 ? 0 : (age <= 12 ? 1 : 2);
+  document.querySelectorAll('.age-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  try { localStorage.setItem('oceanUserAge', age); } catch(e) {}
+  showToast('难度已切换为 ' + diffNames[state.difficulty]);
+}
+
+// ═══════════════════════════════════════
+//  QUIZ ENGINE
+// ═══════════════════════════════════════
+function selectTopic(topic, el) {
+  state.selectedTopic = topic;
+  document.querySelectorAll('#topicGrid .topic-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function resetQuizUI() {
+  state.quizState = 'idle';
+  state.selectedOption = -1;
+  state.answered = false;
+  document.getElementById('quizSelection').style.display = 'block';
+  document.getElementById('quizPlaying').style.display = 'none';
+  document.getElementById('quizResult').style.display = 'none';
+  document.getElementById('quizDiffName').textContent = diffNames[state.difficulty];
+}
+
+function startQuiz() {
+  let pool = questionBank.filter(q => q.difficulty === state.difficulty);
+  if (state.selectedTopic !== 'all') pool = pool.filter(q => q.topic === state.selectedTopic);
+
+  // Not enough, pull from lower difficulty
+  if (pool.length < 8 && state.difficulty > 0) {
+    const lower = questionBank.filter(q => {
+      if (state.selectedTopic !== 'all') return q.difficulty === state.difficulty - 1 && q.topic === state.selectedTopic;
+      return q.difficulty === state.difficulty - 1;
+    });
+    pool = pool.concat(lower);
+  }
+
+  if (pool.length < 3) { showToast('题目不够，请选择全部主题'); return; }
+
+  // Shuffle
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  state.questions = pool.slice(0, Math.min(12, pool.length));
+  state.currentIndex = 0;
+  state.correctCount = 0;
+  state.answered = false;
+  state.selectedOption = -1;
+  state.quizState = 'playing';
+
+  document.getElementById('quizSelection').style.display = 'none';
+  document.getElementById('quizResult').style.display = 'none';
+  document.getElementById('quizPlaying').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = state.questions[state.currentIndex];
+  const idx = state.currentIndex;
+  const total = state.questions.length;
+
+  document.getElementById('progressBar').style.width = ((idx / total) * 100) + '%';
+  document.getElementById('progressCount').textContent = `第 ${idx + 1} / ${total} 题`;
+  document.getElementById('progressTopic').textContent = `${topicNames[q.topic] || ''} · ${q.type === 'truefalse' ? '判断题' : '单选题'}`;
+
+  const card = document.getElementById('questionCard');
+  card.innerHTML = `
+    <span class="q-tag">${topicNames[q.topic] || ''} · ${q.type === 'truefalse' ? '判断题' : '单选题'}</span>
+    <div class="q-text">${q.question}</div>
+    <div class="options-list" id="optionsList">
+      ${q.options.map((opt, i) => `
+        <button class="option" data-index="${i}" onclick="answerQuestion(${i}, this)">
+          <span class="option-letter">${optionLetters[i]}</span>
+          <span class="option-text">${opt}</span>
+        </button>
+      `).join('')}
+    </div>
+    <div id="explanationArea"></div>
+  `;
+
+  document.getElementById('nextBtnWrap').hidden = true;
+  state.answered = false;
+  state.selectedOption = -1;
+}
+
+function answerQuestion(index, el) {
+  if (state.answered) return;
+  state.answered = true;
+  state.selectedOption = index;
+
+  const q = state.questions[state.currentIndex];
+  const isCorrect = index === q.answer;
+  if (isCorrect) state.correctCount++;
+
+  // Highlight options
+  const options = document.querySelectorAll('#optionsList .option');
+  options.forEach((opt, i) => {
+    opt.classList.add('locked');
+    if (i === q.answer) opt.classList.add('correct');
+    if (i === index && i !== q.answer) opt.classList.add('wrong');
+    if (i === index) opt.classList.add('selected');
+  });
+
+  // Show explanation
+  const icon = isCorrect ? '✅' : '❌';
+  const title = isCorrect ? '回答正确！' : '再想一想';
+  document.getElementById('explanationArea').innerHTML = `
+    <div class="explanation">
+      <div class="exp-title">${icon} ${title}</div>
+      <div class="exp-text">${q.explanation}</div>
+      ${q.funFact ? `<div class="fun-fact-inline">💡 ${q.funFact}</div>` : ''}
+    </div>
+  `;
+
+  const nextWrap = document.getElementById('nextBtnWrap');
+  nextWrap.hidden = false;
+  const isLast = state.currentIndex >= state.questions.length - 1;
+  document.getElementById('nextBtn').textContent = isLast ? '查看结果' : '下一题';
+}
+
+function nextQuestion() {
+  if (state.currentIndex >= state.questions.length - 1) {
+    showResult();
+    return;
+  }
+  state.currentIndex++;
+  state.answered = false;
+  state.selectedOption = -1;
+  renderQuestion();
+}
+
+function showResult() {
+  state.quizState = 'finished';
+  const total = state.questions.length;
+  const correct = state.correctCount;
+  const pct = Math.round((correct / total) * 100);
+
+  document.getElementById('quizPlaying').style.display = 'none';
+  document.getElementById('quizResult').style.display = 'block';
+
+  let icon, msg;
+  if (pct >= 90) { icon = '🎉'; msg = '你简直是海洋小博士！'; }
+  else if (pct >= 70) { icon = '👏'; msg = '很不错，继续探索海洋的奥秘！'; }
+  else if (pct >= 50) { icon = '📚'; msg = '还有进步空间，多多学习哦！'; }
+  else { icon = '🌊'; msg = '别灰心，海洋还有很多等着你去发现！'; }
+
+  document.getElementById('resultContent').innerHTML = `
+    <div class="result-icon">${icon}</div>
+    <div class="result-score">${correct} / ${total}</div>
+    <div class="result-label">正确率 ${pct}%</div>
+    <div class="result-msg">${msg}</div>
+    <div class="result-stats">
+      <div class="stat-item"><div class="stat-num">${correct}</div><div class="stat-label">正确</div></div>
+      <div class="stat-item"><div class="stat-num">${total - correct}</div><div class="stat-label">错误</div></div>
+      <div class="stat-item"><div class="stat-num">${diffNames[state.difficulty]}</div><div class="stat-label">难度</div></div>
+    </div>
+    <div class="result-btns">
+      <button class="btn-primary" onclick="resetQuizUI();document.getElementById('quizSelection').style.display='block';document.getElementById('quizResult').style.display='none';">再来一局</button>
+      <button class="btn-outline" onclick="switchTab('home')">返回首页</button>
+    </div>
+  `;
+
+  // Save history
+  try {
+    const history = JSON.parse(localStorage.getItem('oceanHistory') || '[]');
+    history.unshift({
+      date: new Date().toLocaleDateString('zh-CN'),
+      score: `${correct}/${total}`,
+      percent: pct,
+      diffName: diffNames[state.difficulty],
+      topic: state.selectedTopic === 'all' ? '全部' : (topicNames[state.selectedTopic] || '综合')
+    });
+    if (history.length > 20) history.pop();
+    localStorage.setItem('oceanHistory', JSON.stringify(history));
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════
+//  SIMULATIONS
+// ═══════════════════════════════════════
+let simAnimId = null;
+let simData = { windStrength: 3, depthLevel: 0, tideSpeed: 3 };
+
+function switchSim(sim, el) {
+  state.activeSim = sim;
+  document.querySelectorAll('.sim-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  updateSimInfo();
+}
+
+function initSimCanvas() {
+  const canvas = document.getElementById('simCanvas');
+  if (!canvas) return;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = 320 * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = '320px';
+}
+
+function startSimLoop() {
+  if (simAnimId) cancelAnimationFrame(simAnimId);
+  updateSimInfo();
+  function loop() {
+    drawSim();
+    simAnimId = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function drawSim() {
+  const canvas = document.getElementById('simCanvas');
+  if (!canvas || document.getElementById('page-explore').classList.contains('active') === false) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  const dpr = window.devicePixelRatio || 1;
+  const dw = w / dpr;
+  const dh = h / dpr;
+  ctx.save();
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, dw, dh);
+
+  if (state.activeSim === 'tide') drawTide(ctx, dw, dh);
+  else if (state.activeSim === 'current') drawCurrent(ctx, dw, dh);
+  else if (state.activeSim === 'wave') drawWave(ctx, dw, dh);
+  else if (state.activeSim === 'depth') drawDepth(ctx, dw, dh);
+
+  ctx.restore();
+}
+
+function drawTide(ctx, w, h) {
+  const t = Date.now() / 1000;
+  const speed = simData.tideSpeed / 5;
+  const tideH = Math.sin(t * speed) * (h * 0.2) + h * 0.5;
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, 0, h);
+  bg.addColorStop(0, '#0A1628'); bg.addColorStop(0.5, '#0F2B46'); bg.addColorStop(1, '#1A4A7A');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+
+  // Stars
+  ctx.fillStyle = '#FFF';
+  for (let i = 0; i < 20; i++) {
+    ctx.globalAlpha = 0.3 + Math.sin(t * 3 + i) * 0.3;
+    ctx.beginPath(); ctx.arc(w * 0.2 + i * w * 0.04, h * 0.05 + (i % 3) * 20, 1.5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // Moon
+  const mx = w * 0.8, my = h * 0.15;
+  const moonGrad = ctx.createRadialGradient(mx, my, 5, mx, my, 28);
+  moonGrad.addColorStop(0, '#FFFDE7'); moonGrad.addColorStop(1, '#FFC857');
+  ctx.fillStyle = moonGrad; ctx.beginPath(); ctx.arc(mx, my, 28, 0, Math.PI * 2); ctx.fill();
+
+  // Moon glow
+  const glowGrad = ctx.createRadialGradient(mx, my, 25, mx, my, 60);
+  glowGrad.addColorStop(0, 'rgba(255, 200, 87, 0.2)'); glowGrad.addColorStop(1, 'rgba(255, 200, 87, 0)');
+  ctx.fillStyle = glowGrad; ctx.beginPath(); ctx.arc(mx, my, 60, 0, Math.PI * 2); ctx.fill();
+
+  // Earth/ocean
+  ctx.save(); ctx.translate(w * 0.35, h * 0.5);
+  // Ellipse with tidal bulge
+  const rx = w * 0.2, ry = h * 0.32;
+  const bulge = (tideH - h * 0.5) * 0.6;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, rx + bulge * 0.4, ry + bulge * 0.3, 0, 0, Math.PI * 2);
+  const waterGrad = ctx.createLinearGradient(-rx, 0, rx, 0);
+  waterGrad.addColorStop(0, 'rgba(30, 144, 255, 0.25)');
+  waterGrad.addColorStop(0.5, 'rgba(30, 144, 255, 0.45)');
+  waterGrad.addColorStop(1, 'rgba(30, 144, 255, 0.25)');
+  ctx.fillStyle = waterGrad; ctx.fill();
+  ctx.strokeStyle = 'rgba(30, 144, 255, 0.7)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.restore();
+
+  // Tidal label
+  const height = (3.2 + Math.sin(t * speed) * 2.5).toFixed(1);
+  const phase = Math.sin(t * speed) > 0 ? '涨潮中 ↑' : '退潮中 ↓';
+  ctx.fillStyle = '#FFF'; ctx.font = '600 16px "Noto Sans SC", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`${phase} · 潮高 ${height}m`, w * 0.5, h * 0.88);
+}
+
+function drawCurrent(ctx, w, h) {
+  const t = Date.now() / 1000;
+  const bg = ctx.createLinearGradient(0, 0, 0, h);
+  bg.addColorStop(0, '#0D3B66'); bg.addColorStop(1, '#07182C');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+
+  // Land masses
+  ctx.fillStyle = '#1a3a5c'; ctx.fillRect(0, 0, w * 0.12, h); ctx.fillRect(w * 0.88, 0, w * 0.12, h);
+
+  const currents = [
+    { y: h * 0.22, c: '#FF6B6B', s: 1.2 },
+    { y: h * 0.42, c: '#4FC3F7', s: -0.7 },
+    { y: h * 0.62, c: '#FF6B6B', s: 0.9 },
+    { y: h * 0.82, c: '#4FC3F7', s: -0.6 },
+  ];
+
+  currents.forEach(cur => {
+    const offset = (t * cur.s * 80) % w;
+    ctx.globalAlpha = 0.5;
+    for (let x = -w * 0.5; x < w * 1.5; x += 16) {
+      const wy = cur.y + Math.sin((x + offset) * 0.015 + t) * 6;
+      const r = 3 + Math.sin(x * 0.1 + t * 2) * 2;
+      ctx.fillStyle = cur.c;
+      ctx.beginPath(); ctx.arc(x, wy, r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  });
+
+  ctx.fillStyle = '#FFF'; ctx.font = '14px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('暖流 →', w * 0.55, h * 0.19);
+  ctx.fillText('← 寒流', w * 0.45, h * 0.39);
+  ctx.fillText('暖流 →', w * 0.55, h * 0.59);
+  ctx.fillText('← 寒流', w * 0.45, h * 0.79);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = '600 16px "Noto Sans SC", sans-serif';
+  ctx.fillText('全球洋流 · 海洋的"血液循环"', w * 0.5, h * 0.93);
+}
+
+function drawWave(ctx, w, h) {
+  const t = Date.now() / 1000;
+  const wind = simData.windStrength / 5;
+  const amp = wind * h * 0.15;
+
+  const sky = ctx.createLinearGradient(0, 0, 0, h * 0.45);
+  sky.addColorStop(0, '#7EC8E3'); sky.addColorStop(1, '#B8E4F0');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h * 0.45);
+
+  // Sun
+  ctx.fillStyle = '#FFF9C4'; ctx.beginPath(); ctx.arc(w * 0.8, h * 0.15, 35, 0, Math.PI * 2); ctx.fill();
+
+  // Water
+  ctx.beginPath();
+  ctx.moveTo(0, h * 0.4);
+  for (let x = 0; x <= w; x += 2) {
+    const y = h * 0.4 + Math.sin(x * 0.01 + t * 2) * amp * 0.7 + Math.sin(x * 0.035 + t * 3.5) * amp * 0.3 + Math.sin(x * 0.06 + t * 1.5) * amp * 0.15;
+    ctx.lineTo(x, y);
+  }
+  ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
+  const waterGrad = ctx.createLinearGradient(0, h * 0.35, 0, h);
+  waterGrad.addColorStop(0, 'rgba(30, 144, 255, 0.75)');
+  waterGrad.addColorStop(0.4, 'rgba(13, 59, 102, 0.85)');
+  waterGrad.addColorStop(1, '#07182C');
+  ctx.fillStyle = waterGrad; ctx.fill();
+
+  // Foam
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)'; ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, h * 0.4);
+  for (let x = 0; x <= w; x += 2) {
+    const y = h * 0.4 + Math.sin(x * 0.01 + t * 2) * amp * 0.7;
+    ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = '#FFF'; ctx.font = '600 16px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(`风力强度: ${simData.windStrength}/10`, w * 0.5, h * 0.92);
+}
+
+function drawDepth(ctx, w, h) {
+  const level = simData.depthLevel / 100;
+  const darken = level * 0.9 + 0.05;
+
+  const depthGrad = ctx.createLinearGradient(0, 0, 0, h);
+  depthGrad.addColorStop(0, `rgba(14, 167, 232, ${1 - darken})`);
+  depthGrad.addColorStop(0.3, `rgba(10, 100, 180, ${1 - darken * 0.7})`);
+  depthGrad.addColorStop(0.6, `rgba(5, 40, 90, ${1 - darken * 0.5})`);
+  depthGrad.addColorStop(1, `rgba(2, 10, 30, 1)`);
+  ctx.fillStyle = depthGrad; ctx.fillRect(0, 0, w, h);
+
+  // Light rays
+  for (let i = 0; i < 6; i++) {
+    const rx = w * 0.15 + i * w * 0.14;
+    const alpha = Math.max(0, 0.12 - level * 0.1);
+    const rayGrad = ctx.createLinearGradient(rx, 0, rx, h * 0.5);
+    rayGrad.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+    rayGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    ctx.fillStyle = rayGrad;
+    ctx.beginPath();
+    ctx.moveTo(rx - (8 - level * 6), 0);
+    ctx.lineTo(rx + (8 - level * 6), 0);
+    ctx.lineTo(rx + 4, h * 0.45);
+    ctx.lineTo(rx - 4, h * 0.45);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // Bioluminescence
+  const particles = Math.floor(level * 20);
+  const t = Date.now() / 1000;
+  for (let i = 0; i < particles; i++) {
+    const px = (i * w * 0.13 + t * (5 + i * 3)) % w;
+    const py = h * 0.25 + (i * h * 0.06) % (h * 0.7);
+    const a = 0.3 + Math.sin(t * 4 + i) * 0.3;
+    ctx.fillStyle = `rgba(100, 255, 218, ${a})`;
+    ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI * 2); ctx.fill();
+  }
+
+  const depthM = Math.floor(level * 11000);
+  const zones = ['海面（透光层）','浅水层 ~50m','中层 ~200m','中层 ~500m','深海 ~800m','深海 1000m+','深渊 3000m+','超深渊 6000m+'];
+  const zi = Math.min(Math.floor(level * 7), 7);
+
+  ctx.fillStyle = '#FFF'; ctx.font = '600 16px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(`${depthM}m — ${zones[zi]}`, w * 0.5, h * 0.85);
+  ctx.fillText(level > 0.5 ? '🔬 超过76%的深海生物会发光' : '☀️ 蓝光可穿透200米以上', w * 0.5, h * 0.92);
+}
+
+function updateSimInfo() {
+  const info = {
+    tide: { title:'🌙 潮汐模拟', text:'月球引力牵引地球海水，正对和背对月球两侧同时涨潮。大多数沿海地区一天有两次涨退潮。', fact:'芬迪湾（加拿大）拥有世界最大潮差（16.3米），当地地形与月球引潮周期形成"共振"。', slider: true, sliderLabel: '播放速度', sliderVal: simData.tideSpeed, sliderFn: 'onTideSpeed' },
+    current: { title:'🔄 洋流系统', text:'暖流（红线）将赤道热量带向极地，寒流（蓝线）将冷水送回赤道。<span class="hl">一个完整大洋环流走一圈大约需要1,000年！</span>', fact:'黑潮（Kuroshio）是太平洋西边界最强暖流之一，每秒输送约5000万立方米的水——相当于200条长江。', slider: false },
+    wave: { title:'🌊 波浪生成', text:'风吹过海面将能量传递给海水。风越大、吹的距离越长，波浪越高。', fact:'海啸波长可达数百公里，在深海中航行速度接近喷气式飞机。但在海面上你几乎感觉不到它。', slider: true, sliderLabel: '风力强度', sliderVal: simData.windStrength, sliderFn: 'onWindStrength' },
+    depth: { title:'📏 海洋深度', text:'红色光约5米消失，蓝色光能穿透到200米以上。200米以下是永恒黑暗。<span class="hl">最深处的挑战者深渊约10,994米。</span>', fact:'马里亚纳海沟最深处压力超1,000大气压。到过那里的人比登月的人还少——大约只有27人。', slider: true, sliderLabel: '下潜深度', sliderVal: simData.depthLevel, sliderFn: 'onDepthLevel' }
+  };
+
+  const d = info[state.activeSim];
+  document.getElementById('simInfo').innerHTML = `
+    <div class="sim-info-title">${d.title}</div>
+    <div class="sim-info-text">${d.text}</div>
+    ${d.slider ? `<div class="sim-slider"><label>${d.sliderLabel}</label><input type="range" min="1" max="10" value="${d.sliderVal}" oninput="${d.sliderFn}(this.value)"></div>` : ''}
+  `;
+  document.getElementById('simFact').textContent = '💡 ' + d.fact;
+}
+
+function onTideSpeed(v) { simData.tideSpeed = parseInt(v); }
+function onWindStrength(v) { simData.windStrength = parseInt(v); }
+function onDepthLevel(v) { simData.depthLevel = parseInt(v); }
+
+// ═══════════════════════════════════════
+//  KNOWLEDGE
+// ═══════════════════════════════════════
+let knowledgeFilter = 'all';
+function renderKnowledge() {
+  const cats = [
+    { id:'all', name:'全部', icon:'📋' },
+    { id:'biology', name:'海洋生物', icon:'🐋' },
+    { id:'geography', name:'海洋地理', icon:'🌍' },
+    { id:'pollution', name:'海洋环保', icon:'♻️' },
+    { id:'ecosystem', name:'海洋生态', icon:'🪸' },
+    { id:'physics', name:'海洋物理', icon:'⚡' }
+  ];
+
+  document.getElementById('catScroll').innerHTML = cats.map(c => `
+    <button class="cat-chip ${c.id === knowledgeFilter ? 'active' : ''}" onclick="filterKnowledge('${c.id}', this)">${c.icon} ${c.name}</button>
+  `).join('');
+
+  renderKnowledgeCards();
+}
+
+function filterKnowledge(cat, el) {
+  knowledgeFilter = cat;
+  document.querySelectorAll('#catScroll .cat-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderKnowledgeCards();
+}
+
+function renderKnowledgeCards() {
+  const filtered = knowledgeFilter === 'all' ? knowledgeCards : knowledgeCards.filter(c => c.cat === knowledgeFilter);
+  document.getElementById('knowledgeList').innerHTML = filtered.map(c => `
+    <div class="knowledge-card">
+      <div class="kc-tags">
+        <span class="kc-tag kc-cat">${c.catName}</span>
+        <span class="kc-tag kc-diff">📘 ${c.diff}</span>
+      </div>
+      <div class="kc-title">${c.title}</div>
+      ${c.ps.map(p => `<div class="kc-p">${p}</div>`).join('')}
+      ${c.fun ? `<div class="kc-funfact">💡 ${c.fun}</div>` : ''}
+      <div class="kc-source">📖 来源：${c.src}</div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════
+//  HISTORY
+// ═══════════════════════════════════════
+function showHistory() {
+  const history = JSON.parse(localStorage.getItem('oceanHistory') || '[]');
+  const section = document.getElementById('historySection');
+
+  if (history.length === 0) {
+    showToast('还没有答题记录哦');
+    return;
+  }
+
+  const total = history.length;
+  const avg = Math.round(history.reduce((s, i) => s + i.percent, 0) / total);
+  const best = Math.max(...history.map(i => i.percent));
+
+  document.getElementById('historyStats').innerHTML = `
+    <div class="stat-item"><div class="stat-num">${total}</div><div class="stat-label">总挑战次数</div></div>
+    <div class="stat-item"><div class="stat-num">${avg}%</div><div class="stat-label">平均正确率</div></div>
+    <div class="stat-item"><div class="stat-num">${best}%</div><div class="stat-label">最佳成绩</div></div>
+  `;
+
+  document.getElementById('historyList').innerHTML = history.map(h => {
+    const cls = h.percent >= 80 ? 'great' : (h.percent >= 50 ? 'good' : 'try');
+    return `<div class="history-item">
+      <div class="hi-left"><span class="hi-date">${h.date}</span><span class="hi-topic">${h.topic} · ${h.diffName}</span></div>
+      <div><span class="hi-score ${cls}">${h.percent}%</span></div>
+    </div>`;
+  }).join('');
+
+  section.style.display = 'block';
+  section.scrollIntoView({ behavior: 'smooth' });
+}
+
+function clearHistory() {
+  if (confirm('确定要清除所有答题记录吗？')) {
+    localStorage.removeItem('oceanHistory');
+    showToast('记录已清除');
+    document.getElementById('historySection').style.display = 'none';
+  }
+}
+
+// ═══════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ═══════════════════════════════════════
+//  HERO PARTICLES
+// ═══════════════════════════════════════
+function initHeroParticles() {
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+
+  const ctx = canvas.getContext('2d');
+  const particles = [];
+  for (let i = 0; i < 30; i++) {
+    particles.push({
+      x: Math.random() * rect.width,
+      y: Math.random() * rect.height,
+      r: 0.5 + Math.random() * 1.5,
+      vy: 0.2 + Math.random() * 0.4,
+      alpha: 0.3 + Math.random() * 0.5,
+      phase: Math.random() * Math.PI * 2
+    });
+  }
+
+  function anim() {
+    ctx.clearRect(0, 0, rect.width, rect.height);
+    const t = Date.now() / 1000;
+    particles.forEach(p => {
+      p.y += p.vy;
+      if (p.y > rect.height + 10) { p.y = -10; p.x = Math.random() * rect.width; }
+      const a = p.alpha * (0.7 + 0.3 * Math.sin(t * 2 + p.phase));
+      ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    });
+    requestAnimationFrame(anim);
+  }
+  anim();
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Load saved age
+  try {
+    const savedAge = parseInt(localStorage.getItem('oceanUserAge'));
+    if (savedAge) {
+      state.userAge = savedAge;
+      state.difficulty = savedAge <= 9 ? 0 : (savedAge <= 12 ? 1 : 2);
+      document.querySelectorAll('.age-card').forEach(c => c.classList.remove('active'));
+      const target = document.querySelector(`.age-card[data-age="${savedAge}"]`);
+      if (target) target.classList.add('active');
+    }
+  } catch(e) {}
+
+  // Daily fact
+  document.getElementById('dailyFactText').textContent = dailyFacts[Math.floor(Math.random() * dailyFacts.length)];
+
+  // Init
+  document.getElementById('quizDiffName').textContent = diffNames[state.difficulty];
+  initHeroParticles();
+  renderKnowledge();
+
+  // Handle tab bar clicks from inside pages
+  window.addEventListener('resize', () => {
+    if (state.currentTab === 'explore') initSimCanvas();
+  });
+});
+</script>
+</body>
+</html>
