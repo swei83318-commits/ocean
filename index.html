@@ -268,12 +268,13 @@ body {
 /* ── Age Selector ── */
 .age-selector {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-top: 12px;
 }
 
 .age-card {
-  flex: 1;
+  flex: 0 0 calc(33.333% - 7px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -284,6 +285,7 @@ body {
   cursor: pointer;
   transition: all 0.25s;
   font-family: var(--font-body);
+  box-sizing: border-box;
 }
 
 .age-card:hover { background: #E3EDF7; }
@@ -387,17 +389,30 @@ body {
 }
 
 .progress-bar-bg {
-  height: 6px;
+  position: relative;
+  height: 20px;
   background: var(--border);
-  border-radius: 3px;
-  overflow: hidden;
+  border-radius: 12px;
+  overflow: visible;
 }
 
 .progress-bar-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--surface), var(--sonar));
-  border-radius: 3px;
+  border-radius: 12px;
   transition: width 0.3s ease;
+}
+
+.progress-octopus {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  transform: translate(-50%, -50%);
+  font-size: 26px;
+  line-height: 1;
+  transition: left 0.3s ease;
+  z-index: 2;
+  filter: drop-shadow(0 1px 2px rgba(7, 24, 44, 0.3));
 }
 
 .progress-info {
@@ -608,6 +623,15 @@ body {
 
 .sim-slider label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
 .sim-slider input { flex: 1; accent-color: var(--surface); }
+.sim-slider-value {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--surface);
+  min-width: 52px;
+  text-align: right;
+  white-space: nowrap;
+}
 
 .sim-stats-row {
   display: flex;
@@ -829,8 +853,6 @@ body {
         <div class="hero-content">
           <div class="hero-title">潜行学院</div>
           <div class="hero-subtitle">GROWING FORWARD ACADEMY</div>
-          <div class="hero-subtitle" style="margin-top:4px;font-size:13px;">探索海洋的奥秘，成为海洋小达人</div>
-          <div style="margin-top:16px;font-size:14px;color:#FFD93D;font-weight:600;">🐙 吉祥物「章鱼侠」陪你一起闯关</div>
         </div>
       </div>
 
@@ -851,6 +873,16 @@ body {
             <span class="age-icon">🔬</span>
             <span class="age-label">13-14 岁</span>
             <span class="age-desc">挑战研究者</span>
+          </button>
+          <button class="age-card" data-age="16" onclick="selectAge(16, this)">
+            <span class="age-icon">🧭</span>
+            <span class="age-label">15-18 岁</span>
+            <span class="age-desc">深蓝领航员</span>
+          </button>
+          <button class="age-card" data-age="99" onclick="selectAge(99, this)">
+            <span class="age-icon">🌏</span>
+            <span class="age-label">海洋爱好者</span>
+            <span class="age-desc">全年龄畅游</span>
           </button>
         </div>
       </div>
@@ -935,7 +967,10 @@ body {
 
       <div id="quizPlaying" style="display:none;">
         <div class="progress-wrap">
-          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+            <div class="progress-octopus" id="progressOctopus">🐙</div>
+          </div>
           <div class="progress-info">
             <span id="progressCount"></span>
             <span id="progressTopic"></span>
@@ -1006,58 +1041,61 @@ body {
 // ═══════════════════════════════════════
 const questionBank = [
   // 海洋生物 - 入门
-  { id:'bio_easy_01',topic:'biology',difficulty:0,type:'single',question:'世界上最大的动物是什么？',options:['蓝鲸','大象','恐龙','大白鲨'],answer:0,explanation:'蓝鲸是地球上现存最大的动物，成年蓝鲸可以长到30米以上，相当于三辆公交车首尾相连那么长！',funFact:'🐋 蓝鲸的舌头就和大象一样重！'},
-  { id:'bio_easy_02',topic:'biology',difficulty:0,type:'single',question:'海豚是怎么"看"东西的？',options:['用声波定位','用眼睛看','用触觉感知','靠同伴告诉它'],answer:0,explanation:'海豚会发出声波，碰到物体后反弹回来，海豚就能"听"出物体的位置——像蝙蝠一样！这叫回声定位。',funFact:'🐬 海豚睡觉时一半大脑醒着、一半大脑睡觉，轮流休息！'},
-  { id:'bio_easy_03',topic:'biology',difficulty:0,type:'single',question:'章鱼有几条腕足？',options:['8条','6条','10条','100条'],answer:0,explanation:'章鱼有8条腕足，每条腕足上都有吸盘，可以同时做不同的事情！',funFact:'🐙 章鱼的血液是蓝色的！'},
-  { id:'bio_easy_04',topic:'biology',difficulty:0,type:'single',question:'小海龟孵出来后第一件事是做什么？',options:['拼命爬向大海','找妈妈吃奶','躲进沙子里','飞起来'],answer:0,explanation:'小海龟破壳后会本能地爬向最亮的方向——自然环境中就是大海反射月光的方向。',funFact:'🐢 海龟妈妈产完蛋后就离开了，小海龟从没见过妈妈！'},
+  { id:'bio_easy_01',topic:'biology',difficulty:0,type:'single',question:'世界上最大的动物是什么？',options:['大白鲨','大象','蓝鲸','恐龙'],answer:2,explanation:'蓝鲸是地球上现存最大的动物，成年蓝鲸可以长到30米以上，相当于三辆公交车首尾相连那么长！',funFact:'🐋 蓝鲸的舌头就和大象一样重！'},
+  { id:'bio_easy_02',topic:'biology',difficulty:0,type:'single',question:'海豚是怎么"看"东西的？',options:['用眼睛看','用声波定位','靠同伴告诉它','用触觉感知'],answer:1,explanation:'海豚会发出声波，碰到物体后反弹回来，海豚就能"听"出物体的位置——像蝙蝠一样！这叫回声定位。',funFact:'🐬 海豚睡觉时一半大脑醒着、一半大脑睡觉，轮流休息！'},
+  { id:'bio_easy_03',topic:'biology',difficulty:0,type:'single',question:'章鱼有几条腕足？',options:['100条','8条','10条','6条'],answer:1,explanation:'章鱼有8条腕足，每条腕足上都有吸盘，可以同时做不同的事情！',funFact:'🐙 章鱼的血液是蓝色的！'},
+  { id:'bio_easy_04',topic:'biology',difficulty:0,type:'single',question:'小海龟孵出来后第一件事是做什么？',options:['躲进沙子里','拼命爬向大海','找妈妈吃奶','飞起来'],answer:1,explanation:'小海龟破壳后会本能地爬向最亮的方向——自然环境中就是大海反射月光的方向。',funFact:'🐢 海龟妈妈产完蛋后就离开了，小海龟从没见过妈妈！'},
   { id:'bio_easy_05',topic:'biology',difficulty:0,type:'truefalse',question:'所有鲨鱼都必须不停游泳，否则就会死掉。',options:['对','错'],answer:1,explanation:'错！有些鲨鱼（如护士鲨）可以通过嘴巴和鳃主动呼吸，可以趴在海底休息。',funFact:'🦈 鲨鱼已经在地球上生活了超过4亿年，比恐龙还要早！'},
-  { id:'bio_easy_06',topic:'biology',difficulty:0,type:'single',question:'水母的身体主要由什么组成？',options:['水','胶水','鱼肉','海草'],answer:0,explanation:'水母的身体95%以上都是水！被冲上岸后会很快消失——水分蒸发后就只剩薄膜了。',funFact:'🧪 水母没有心脏、没有大脑、也没有骨头！'},
+  { id:'bio_easy_06',topic:'biology',difficulty:0,type:'single',question:'水母的身体主要由什么组成？',options:['鱼肉','海草','水','胶水'],answer:2,explanation:'水母的身体95%以上都是水！被冲上岸后会很快消失——水分蒸发后就只剩薄膜了。',funFact:'🧪 水母没有心脏、没有大脑、也没有骨头！'},
   // 海洋生物 - 进阶
-  { id:'bio_med_01',topic:'biology',difficulty:1,type:'single',question:'为什么深海鱼的身体通常扁扁的、软软的？',options:['适应高压环境','因为吃得少长不胖','为了在海底打洞','方便其他鱼按摩'],answer:0,explanation:'深海压力极大，每加深10米就增加约1个大气压。深海鱼进化出了柔软扁平的身体来适应。',funFact:'📐 马里亚纳海沟底部压力约1100个大气压，相当于大拇指上站一头大象！'},
+  { id:'bio_med_01',topic:'biology',difficulty:1,type:'single',question:'为什么深海鱼的身体通常扁扁的、软软的？',options:['方便其他鱼按摩','适应高压环境','为了在海底打洞','因为吃得少长不胖'],answer:1,explanation:'深海压力极大，每加深10米就增加约1个大气压。深海鱼进化出了柔软扁平的身体来适应。',funFact:'📐 马里亚纳海沟底部压力约1100个大气压，相当于大拇指上站一头大象！'},
   { id:'bio_med_02',topic:'biology',difficulty:1,type:'single',question:'座头鲸的"歌声"有什么作用？',options:['求偶和交流','吓跑捕食者','麻醉猎物','帮助消化'],answer:0,explanation:'雄性座头鲸在繁殖季节发出复杂"歌曲"，用来吸引配偶。同一海域的座头鲸会唱同一首歌，还会逐年更新！',funFact:'🎵 座头鲸的歌声可以在水中传播数千公里！'},
-  { id:'bio_med_03',topic:'biology',difficulty:1,type:'single',question:'珊瑚是动物、植物还是矿物？',options:['动物（珊瑚虫）','植物（海藻）','矿物（石头）','半植物半动物'],answer:0,explanation:'珊瑚是由成千上万只微小的"珊瑚虫"组成的群体，是货真价实的动物。体内共生着虫黄藻。',funFact:'🏠 珊瑚礁覆盖不到1%的海洋面积，却养育了超过25%的海洋生物物种！'},
+  { id:'bio_med_03',topic:'biology',difficulty:1,type:'single',question:'珊瑚是动物、植物还是矿物？',options:['半植物半动物','矿物（石头）','植物（海藻）','动物（珊瑚虫）'],answer:3,explanation:'珊瑚是由成千上万只微小的"珊瑚虫"组成的群体，是货真价实的动物。体内共生着虫黄藻。',funFact:'🏠 珊瑚礁覆盖不到1%的海洋面积，却养育了超过25%的海洋生物物种！'},
   { id:'bio_med_04',topic:'biology',difficulty:1,type:'single',question:'企鹅为什么不会飞？',options:['翅膀进化成游泳鳍','翅膀被冻住了','吃太胖了','本来就会飞'],answer:0,explanation:'企鹅的翅膀进化为像船桨一样的鳍状肢，在水中产生强大推力——企鹅其实是在水下"飞行"！',funFact:'🏊 帝企鹅可以潜入500米深的水下，憋气超过20分钟！'},
   { id:'bio_med_05',topic:'biology',difficulty:1,type:'truefalse',question:'海绵（海洋里的那种）是活的动物。',options:['对','错'],answer:0,explanation:'对！海绵是地球上最原始的多细胞动物之一。它们通过过滤海水中的微生物来进食。',funFact:'🧽 古人真的用海绵的"骨架"来洗澡！'},
   { id:'bio_med_06',topic:'biology',difficulty:1,type:'single',question:'鲸鱼喷出的"水柱"实际是什么？',options:['呼出气体凝结的水雾','嘴里喷出的海水','专门储存的喷水','鲸鱼的眼泪'],answer:0,explanation:'鲸鱼用肺呼吸，温暖湿润的呼气遇到冷空气，水蒸气迅速凝结成水滴——就形成了"喷潮"。',funFact:'🌬️ 不同种类的鲸鱼喷出的气柱形状不同，科学家凭此就能判断种类！'},
   // 海洋生物 - 挑战
-  { id:'bio_hard_01',topic:'biology',difficulty:2,type:'single',question:'海洋"生物荧光"和"生物发光"有什么区别？',options:['荧光需外部光源，发光是自身化学反应','荧光是动物，发光是植物','荧光白天，发光晚上','没有区别'],answer:0,explanation:'生物发光是体内荧光素酶催化产生光——不需要外部光源。生物荧光则是吸收特定波长光再重新发射——需要外部光源。',funFact:'💡 大约76%的深海动物具有生物发光能力！'},
+  { id:'bio_hard_01',topic:'biology',difficulty:2,type:'single',question:'海洋"生物荧光"和"生物发光"有什么区别？',options:['没有区别','荧光是动物，发光是植物','荧光需外部光源，发光是自身化学反应','荧光白天，发光晚上'],answer:2,explanation:'生物发光是体内荧光素酶催化产生光——不需要外部光源。生物荧光则是吸收特定波长光再重新发射——需要外部光源。',funFact:'💡 大约76%的深海动物具有生物发光能力！'},
   { id:'bio_hard_02',topic:'biology',difficulty:2,type:'single',question:'海洋中最大的氧气来源是什么？',options:['浮游植物','海藻和海草','大气溶解','大型海藻林'],answer:0,explanation:'海洋浮游植物贡献了地球约50-80%的氧气产量，远超所有热带雨林的总和。',funFact:'🫧 你每呼吸两口氧气，就有一口来自海洋！'},
-  { id:'bio_hard_03',topic:'biology',difficulty:2,type:'single',question:'深海热泉喷口附近为何有丰富生物群落（没有阳光）？',options:['化能合成细菌利用硫化氢制造有机物','热泉热量融化海水释放营养','深海鱼只需要热量','热泉水含蛋白质'],answer:0,explanation:'化能合成细菌利用喷口释放的硫化氢作为能源，将CO₂合成有机物——支撑了整个不依赖阳光的生态系统。',funFact:'🌋 深海热泉喷口温度可达400°C，但周围海水只有2°C！'},
+  { id:'bio_hard_03',topic:'biology',difficulty:2,type:'single',question:'深海热泉喷口附近为何有丰富生物群落（没有阳光）？',options:['深海鱼只需要热量','热泉热量融化海水释放营养','热泉水含蛋白质','化能合成细菌利用硫化氢制造有机物'],answer:3,explanation:'化能合成细菌利用喷口释放的硫化氢作为能源，将CO₂合成有机物——支撑了整个不依赖阳光的生态系统。',funFact:'🌋 深海热泉喷口温度可达400°C，但周围海水只有2°C！'},
+  { id:'bio_hard_04',topic:'biology',difficulty:2,type:'single',question:'海洋哺乳动物在水下能长时间憋气的关键生理机制是什么？',options:['它们可以把氧气储存在胃里','潜水反射：心率减慢+血液优先供给大脑心脏+肌肉肌红蛋白储氧','它们可以停止心跳来减少耗氧','它们在水下可以从皮肤吸收氧气'],answer:1,explanation:'这被称为"哺乳动物潜水反射"：入水后心率自动减慢（可降到正常的1/10），外周血管收缩将血液优先分配给大脑和心脏，加上肌肉中高浓度肌红蛋白储氧。人类也有微弱的潜水反射！',funFact:'🫀 柯氏喙鲸保持着哺乳动物潜水纪录：137.5分钟！'},
   // 海洋地理 - 入门
-  { id:'geo_easy_01',topic:'geography',difficulty:0,type:'single',question:'地球表面被海洋覆盖的面积大约有多少？',options:['约七成（70%）','约三成（30%）','约一半（50%）','约九成（90%）'],answer:0,explanation:'地球表面大约71%被海洋覆盖！从太空看，地球是一颗美丽的蓝色星球。',funFact:'🌍 如果地球表面完全平整，整个地球将被约2.7公里深的海水覆盖！'},
+  { id:'geo_easy_01',topic:'geography',difficulty:0,type:'single',question:'地球表面被海洋覆盖的面积大约有多少？',options:['约三成（30%）','约七成（70%）','约九成（90%）','约一半（50%）'],answer:1,explanation:'地球表面大约71%被海洋覆盖！从太空看，地球是一颗美丽的蓝色星球。',funFact:'🌍 如果地球表面完全平整，整个地球将被约2.7公里深的海水覆盖！'},
   { id:'geo_easy_02',topic:'geography',difficulty:0,type:'single',question:'海水为什么是咸的？',options:['雨水冲刷岩石带入盐分','海里的鱼产盐','月亮倒的盐','天生就咸'],answer:0,explanation:'雨水溶解岩石中的矿物质（包括盐），河流带入海洋。海水蒸发只蒸发水，盐留在海里——亿万年来盐分不断累积。',funFact:'🧂 如果海水全部蒸发，留下的盐可覆盖地球表面约45米厚！'},
-  { id:'geo_easy_03',topic:'geography',difficulty:0,type:'single',question:'潮汐（涨潮退潮）主要由什么引起？',options:['月球引力','海风','地球自转','太阳热量'],answer:0,explanation:'潮汐主要受月球引力影响。月球拉着海水，正对月球和背对月球两侧同时涨潮。',funFact:'🌊 太阳也会影响潮汐——新月满月时潮汐特别大，叫"大潮"！'},
-  { id:'geo_easy_04',topic:'geography',difficulty:0,type:'single',question:'世界上最深的海沟叫什么？',options:['马里亚纳海沟','日本海沟','秘鲁海沟','汤加海沟'],answer:0,explanation:'马里亚纳海沟最深处约11,000米，把珠穆朗玛峰放进去，峰顶还在水下约2公里。',funFact:'🏔️ 到过马里亚纳海沟底部的人比上过月球的人还少！'},
-  { id:'geo_easy_05',topic:'geography',difficulty:0,type:'single',question:'波浪是怎么形成的？',options:['风把能量传给海水','海底火山','鱼群游动','地球自转'],answer:0,explanation:'风把能量传递给海水形成波浪。风越大、吹得越远，波浪越高。',funFact:'🌬️ 台风中心的巨浪可以高达15米以上，差不多五层楼高！'},
+  { id:'geo_easy_03',topic:'geography',difficulty:0,type:'single',question:'潮汐（涨潮退潮）主要由什么引起？',options:['海风','太阳热量','地球自转','月球引力'],answer:3,explanation:'潮汐主要受月球引力影响。月球拉着海水，正对月球和背对月球两侧同时涨潮。',funFact:'🌊 太阳也会影响潮汐——新月满月时潮汐特别大，叫"大潮"！'},
+  { id:'geo_easy_04',topic:'geography',difficulty:0,type:'single',question:'世界上最深的海沟叫什么？',options:['汤加海沟','马里亚纳海沟','秘鲁海沟','日本海沟'],answer:1,explanation:'马里亚纳海沟最深处约11,000米，把珠穆朗玛峰放进去，峰顶还在水下约2公里。',funFact:'🏔️ 到过马里亚纳海沟底部的人比上过月球的人还少！'},
+  { id:'geo_easy_05',topic:'geography',difficulty:0,type:'single',question:'波浪是怎么形成的？',options:['地球自转','鱼群游动','海底火山','风把能量传给海水'],answer:3,explanation:'风把能量传递给海水形成波浪。风越大、吹得越远，波浪越高。',funFact:'🌬️ 台风中心的巨浪可以高达15米以上，差不多五层楼高！'},
   { id:'geo_easy_06',topic:'geography',difficulty:0,type:'truefalse',question:'四大洋中，北冰洋是最小的。',options:['对','错'],answer:0,explanation:'对！从大到小：太平洋>大西洋>印度洋>北冰洋。北冰洋面积只有太平洋的约1/10。',funFact:'🧊 北冰洋大部分海面常年被海冰覆盖，但近年来冰层在快速减少。'},
   // 海洋地理 - 进阶
   { id:'geo_med_01',topic:'geography',difficulty:1,type:'single',question:'洋流对地球气候最重要的作用是什么？',options:['传送带般把热量从赤道送往两极','给鲸鱼提供迁徙通道','搬运沙子','让海水变咸'],answer:0,explanation:'洋流是地球的"热量输送系统"，暖流把赤道热量带向高纬，寒流把冷水送回赤道。',funFact:'🔄 一个完整的"大洋传送带"走一圈大约需要1,000年！'},
   { id:'geo_med_02',topic:'geography',difficulty:1,type:'single',question:'海啸和普通海浪的本质不同是什么？',options:['海啸波长极长（数百公里），由海底地震引起','海啸只是更大的普通海浪','海啸由台风引起','海啸是月球引力异常产生'],answer:0,explanation:'海啸由海底地震引发，波长可达数百公里。在深海中几乎察觉不到，靠近海岸时能量聚集可形成数十米水墙。',funFact:'⚠️ 2004年印度洋海啸在深海的传播速度接近喷气式飞机（约800km/h）！'},
-  { id:'geo_med_03',topic:'geography',difficulty:1,type:'single',question:'死海为什么叫"死海"？',options:['盐度极高（约34%），生物无法生存','海里生物都是僵尸','靠近地狱','有毒气'],answer:0,explanation:'死海是内陆盐湖，盐度约34%，是普通海水的近10倍。海洋生物进入会立即脱水死亡。但极高盐度带来极高浮力。',funFact:'🏊 在死海游泳不是"游"的，是"躺"的——根本沉不下去！'},
+  { id:'geo_med_03',topic:'geography',difficulty:1,type:'single',question:'死海为什么叫"死海"？',options:['盐度极高（约34%），生物无法生存','有毒气','海里生物都是僵尸','靠近地狱'],answer:0,explanation:'死海是内陆盐湖，盐度约34%，是普通海水的近10倍。海洋生物进入会立即脱水死亡。但极高盐度带来极高浮力。',funFact:'🏊 在死海游泳不是"游"的，是"躺"的——根本沉不下去！'},
   { id:'geo_med_04',topic:'geography',difficulty:1,type:'single',question:'海水在不同深度颜色为什么不同？',options:['水对不同波长光吸收不同——红光先消失，蓝光穿透最深','不同深度盐度不同','海底颜色反射','不同深度浮游生物染色'],answer:0,explanation:'红、橙、黄色光依次在浅层被吸收，只有蓝光能穿透到200米以上。深海因此呈现深蓝色。',funFact:'🌈 在水下约30米深度，伤口流出的血看起来是绿色的！'},
   { id:'geo_med_05',topic:'geography',difficulty:1,type:'truefalse',question:'北极和南极的冰融化都会导致海平面上升。',options:['对','错'],answer:1,explanation:'错！北极冰是漂浮海冰，融化不增加海平面（像杯子里冰块融化）。南极冰在陆地上，融化流入海洋才会导致海平面上升。',funFact:'🧊 如果南极冰盖完全融化，全球海平面将上升约58米！'},
   // 海洋地理 - 挑战
-  { id:'geo_hard_01',topic:'geography',difficulty:2,type:'single',question:'什么是"温盐环流"（大洋传送带）？由什么驱动？',options:['温度盐度差异驱动全球深层洋流','台风搅拌','科里奥利力','潮汐搅拌'],answer:0,explanation:'温盐环流由温度和盐度差异驱动。北大西洋冷咸水下沉，在深层流向赤道，表层暖水回流极地——形成全球传送带。',funFact:'🔬 温盐环流如果显著减弱，可能引发剧烈的气候变化！'},
+  { id:'geo_hard_01',topic:'geography',difficulty:2,type:'single',question:'什么是"温盐环流"（大洋传送带）？由什么驱动？',options:['潮汐搅拌','温度盐度差异驱动全球深层洋流','科里奥利力','台风搅拌'],answer:1,explanation:'温盐环流由温度和盐度差异驱动。北大西洋冷咸水下沉，在深层流向赤道，表层暖水回流极地——形成全球传送带。',funFact:'🔬 温盐环流如果显著减弱，可能引发剧烈的气候变化！'},
   { id:'geo_hard_02',topic:'geography',difficulty:2,type:'single',question:'海洋酸化如何发生？与大气CO₂有什么关系？',options:['CO₂溶于海水形成碳酸→降低pH→影响钙化生物','酸雨落入海洋','海藻死亡释放酸性物质','海底火山释放硫酸'],answer:0,explanation:'人类排放的CO₂约30%被海洋吸收。CO₂溶解形成碳酸，释放氢离子导致pH下降——就是海洋酸化。',funFact:'📉 自工业革命以来，海洋表层pH已从8.2降至8.1——酸度增加了约30%！'},
+  { id:'geo_hard_03',topic:'geography',difficulty:2,type:'single',question:'海洋中层（200-1000米）为什么被称为"暮光区"？',options:['因为海水呈现暮光般的紫色','因为这是日出日落的交界区','光线极其微弱但仍有残余——许多生物在此昼夜垂直迁移','因为科学家第一次到那里是在傍晚'],answer:2,explanation:'海洋中层只能接收到微弱的蓝光，因此被称为"暮光区"。这里每天上演地球上规模最大的生物迁徙：夜晚上浮觅食，白天下沉回避捕食者，全球同步，涉及数十亿吨生物量。',funFact:'🌅 暮光区的生物总量可能远超估计——也许是地球最大的未充分开发的生物资源！'},
   // 海洋环保 - 入门
-  { id:'pol_easy_01',topic:'pollution',difficulty:0,type:'single',question:'海洋里最多的垃圾是什么？',options:['塑料垃圾','玻璃瓶','木头','铁罐'],answer:0,explanation:'塑料占海洋垃圾80%以上。一个塑料瓶在海里可能需要450年才能分解。',funFact:'🗑️ 每年约800万吨塑料排入海洋，相当于每分钟倒一卡车塑料！'},
-  { id:'pol_easy_02',topic:'pollution',difficulty:0,type:'single',question:'吃鱼可能会吃到什么不该吃的东西？',options:['微塑料进入食物链','鱼的眼泪','海盐粒','海藻种子'],answer:0,explanation:'塑料在海洋中碎裂成微塑料（<5mm），被小鱼吃掉，大鱼吃小鱼，最终可能出现在餐桌上。',funFact:'🔍 科学家已经在人类血液和胎盘中发现了微塑料！'},
+  { id:'pol_easy_01',topic:'pollution',difficulty:0,type:'single',question:'海洋里最多的垃圾是什么？',options:['玻璃瓶','木头','塑料垃圾','铁罐'],answer:2,explanation:'塑料占海洋垃圾80%以上。一个塑料瓶在海里可能需要450年才能分解。',funFact:'🗑️ 每年约800万吨塑料排入海洋，相当于每分钟倒一卡车塑料！'},
+  { id:'pol_easy_02',topic:'pollution',difficulty:0,type:'single',question:'吃鱼可能会吃到什么不该吃的东西？',options:['海藻种子','海盐粒','鱼的眼泪','微塑料进入食物链'],answer:3,explanation:'塑料在海洋中碎裂成微塑料（<5mm），被小鱼吃掉，大鱼吃小鱼，最终可能出现在餐桌上。',funFact:'🔍 科学家已经在人类血液和胎盘中发现了微塑料！'},
   { id:'pol_easy_03',topic:'pollution',difficulty:0,type:'single',question:'我们能做哪件小事帮助保护海洋？',options:['少用一次性塑料','把垃圾扔进海里','用更多塑料袋','不管它'],answer:0,explanation:'少用一次性塑料（塑料袋/瓶/吸管），自带水杯和购物袋——每个人都能帮忙。',funFact:'🌱 一个可重复使用的水杯，一年可省下约365个塑料瓶！'},
   { id:'pol_easy_04',topic:'pollution',difficulty:0,type:'truefalse',question:'过度捕捞就是人类捕捞鱼类的速度超过鱼类繁殖的速度。',options:['对','错'],answer:0,explanation:'对！目前全球约34%的渔业资源被过度捕捞。蓝鳍金枪鱼的数量已减少超过95%。',funFact:'🐟 过度捕捞是海洋生物多样性面临的最大威胁之一。'},
   // 海洋环保 - 进阶
-  { id:'pol_med_01',topic:'pollution',difficulty:1,type:'single',question:'海洋"死亡区"（缺氧区）是怎么形成的？',options:['化肥流入→藻类疯长→死亡分解耗氧','海底火山耗氧','阳光不足不产氧','垃圾挡住空气'],answer:0,explanation:'农业化肥通过河流入海造成富营养化，藻类疯长后死亡被细菌分解，消耗大量溶解氧——形成"死区"。全球已有超400个海洋死区。',funFact:'💀 墨西哥湾的死区面积有时超过20,000平方公里——相当于整个北京市！'},
-  { id:'pol_med_02',topic:'pollution',difficulty:1,type:'single',question:'什么是"幽灵渔具"？',options:['被遗弃的渔网继续捕杀海洋生物','捕幽灵的渔具','透明渔具','晚上才出现的渔具'],answer:0,explanation:'幽灵渔具是被遗弃在海洋中的渔网、鱼笼，会继续缠绕和杀死海洋生物年复一年。占海洋塑料污染的约10%。',funFact:'🕸️ 一张被遗弃的大型流网可长达数公里，在海上漂荡数十年！'},
+  { id:'pol_med_01',topic:'pollution',difficulty:1,type:'single',question:'海洋"死亡区"（缺氧区）是怎么形成的？',options:['垃圾挡住空气','阳光不足不产氧','海底火山耗氧','化肥流入→藻类疯长→死亡分解耗氧'],answer:3,explanation:'农业化肥通过河流入海造成富营养化，藻类疯长后死亡被细菌分解，消耗大量溶解氧——形成"死区"。全球已有超400个海洋死区。',funFact:'💀 墨西哥湾的死区面积有时超过20,000平方公里——相当于整个北京市！'},
+  { id:'pol_med_02',topic:'pollution',difficulty:1,type:'single',question:'什么是"幽灵渔具"？',options:['透明渔具','捕幽灵的渔具','晚上才出现的渔具','被遗弃的渔网继续捕杀海洋生物'],answer:3,explanation:'幽灵渔具是被遗弃在海洋中的渔网、鱼笼，会继续缠绕和杀死海洋生物年复一年。占海洋塑料污染的约10%。',funFact:'🕸️ 一张被遗弃的大型流网可长达数公里，在海上漂荡数十年！'},
   { id:'pol_med_03',topic:'pollution',difficulty:1,type:'single',question:'石油泄漏对海洋生物最大的危害？',options:['覆盖海鸟羽毛+阻碍气体交换+毒性入食物链','石油爆炸烧死鱼','臭味熏跑鱼','染黑海水无光'],answer:0,explanation:'石油泄漏多方面危害：海鸟羽毛沾油失去防水保温而冻死；油膜阻碍海气交换；有毒物质通过食物链富集。',funFact:'🛢️ 2010年墨西哥湾漏油事件释放了约490万桶原油！'},
   { id:'pol_med_04',topic:'pollution',difficulty:1,type:'truefalse',question:'设立海洋保护区对恢复鱼类种群没有效果。',options:['对','错'],answer:1,explanation:'错！大量科学证明严格海洋保护区可有效恢复鱼类种群，保护区周边渔业产量反而提高——"溢出效应"。',funFact:'🐠 大堡礁海洋公园设立后，部分区域鱼类数量在几年内翻了好几倍！'},
   // 海洋环保 - 挑战
-  { id:'pol_hard_01',topic:'pollution',difficulty:2,type:'single',question:'什么是"生物放大"？污染物如何通过食物链影响顶级捕食者？',options:['污染物沿食物链浓度逐级升高，顶级捕食者体内最高','鱼的体型变大','鱼的数量增加','微生物分解污染物'],answer:0,explanation:'持久性有机污染物难降解、易溶于脂肪。浮游生物→小鱼→大鱼→顶级捕食者，浓度逐级升高可达海水中的数百万倍。',funFact:'🧪 有些人造化学物质禁用几十年后，仍能在深海生物体内检测到！'},
+  { id:'pol_hard_01',topic:'pollution',difficulty:2,type:'single',question:'什么是"生物放大"？污染物如何通过食物链影响顶级捕食者？',options:['微生物分解污染物','鱼的数量增加','鱼的体型变大','污染物沿食物链浓度逐级升高，顶级捕食者体内最高'],answer:3,explanation:'持久性有机污染物难降解、易溶于脂肪。浮游生物→小鱼→大鱼→顶级捕食者，浓度逐级升高可达海水中的数百万倍。',funFact:'🧪 有些人造化学物质禁用几十年后，仍能在深海生物体内检测到！'},
   { id:'pol_hard_02',topic:'pollution',difficulty:2,type:'single',question:'气候变化对海洋最直接的两个物理影响是什么？',options:['海水变暖+海平面上升 和 海洋酸化','海变红+浪变高','海水变甜+洋流加速','海底抬升+面积扩大'],answer:0,explanation:'两个直接影响：海水温度上升（热膨胀）+冰盖融化导致海平面上升；海洋吸收过量CO₂导致pH下降（酸化）。',funFact:'📈 过去100年全球海平面上升了约20厘米，且上升速度在加快！'},
+  { id:'pol_hard_03',topic:'pollution',difficulty:2,type:'single',question:'水产养殖（人工养殖海鲜）一定是可持续的吗？',options:['一定不可持续——因为需要大量淡水','只和价格有关，和环境无关','一定可持续——因为是人工养的','不一定——取决于养殖方式：虾塘可能毁红树林、滥用抗生素、过度捕捞鱼苗'],answer:3,explanation:'水产养殖的可持续性取决于具体做法。粗放型虾塘养殖导致红树林被砍伐；高密度养殖导致疾病和抗生素滥用；肉食性鱼类养殖还要用大量野生小鱼做饲料。',funFact:'🦐 全球约35%的红树林消失与虾塘养殖有关！'},
   // 海洋生态 - 入门
   { id:'eco_easy_01',topic:'ecosystem',difficulty:0,type:'single',question:'珊瑚礁被称为海洋中的什么？',options:['热带雨林','沙漠','草原','冰山'],answer:0,explanation:'珊瑚礁被称为"海洋中的热带雨林"！虽只占海洋不到1%，但养育了超过25%的海洋生物物种。',funFact:'🏙️ 一个健康的珊瑚礁在百米范围内可容纳数千个物种！'},
-  { id:'eco_easy_02',topic:'ecosystem',difficulty:0,type:'single',question:'红树林长在哪里？',options:['海陆交界的潮间带','深海海底','高山上','沙漠里'],answer:0,explanation:'红树林生长在热带海岸潮间带，涨潮时被淹、退潮时露出。根像"高跷"一样露出水面。',funFact:'🦀 红树林是小螃蟹小鱼的"幼儿园"！'},
-  { id:'eco_easy_03',topic:'ecosystem',difficulty:0,type:'single',question:'海洋食物链最底层是什么？',options:['浮游植物','小虾米','沙子','细菌'],answer:0,explanation:'浮游植物是海洋食物链的基础！这些微小的植物通过光合作用制造有机物，支撑了整个海洋生命。',funFact:'🔬 一勺海水中可能有数百万个浮游植物！'},
+  { id:'eco_easy_02',topic:'ecosystem',difficulty:0,type:'single',question:'红树林长在哪里？',options:['沙漠里','高山上','深海海底','海陆交界的潮间带'],answer:3,explanation:'红树林生长在热带海岸潮间带，涨潮时被淹、退潮时露出。根像"高跷"一样露出水面。',funFact:'🦀 红树林是小螃蟹小鱼的"幼儿园"！'},
+  { id:'eco_easy_03',topic:'ecosystem',difficulty:0,type:'single',question:'海洋食物链最底层是什么？',options:['沙子','浮游植物','小虾米','细菌'],answer:1,explanation:'浮游植物是海洋食物链的基础！这些微小的植物通过光合作用制造有机物，支撑了整个海洋生命。',funFact:'🔬 一勺海水中可能有数百万个浮游植物！'},
   { id:'eco_easy_04',topic:'ecosystem',difficulty:0,type:'truefalse',question:'海带森林是由巨型海藻组成的水下"森林"。',options:['对','错'],answer:0,explanation:'对！巨藻可以长到50米以上，以每天几十厘米的速度生长，形成茂密的"水下森林"。',funFact:'🌿 巨藻是世界上生长最快的生物之一——一天可长60厘米！'},
-  { id:'eco_easy_05',topic:'ecosystem',difficulty:0,type:'single',question:'海獭为什么对海带森林很重要？',options:['海獭吃海胆保护海带','海獭种海带','叫声让海带生长','带来养分'],answer:0,explanation:'海獭是海带森林的"守护者"！海胆吃海带根部，海獭吃海胆控制其数量——这叫"关键种"。',funFact:'🦦 海獭是少数会使用工具的海洋动物——它们用石头敲开贝壳！'},
+  { id:'eco_easy_05',topic:'ecosystem',difficulty:0,type:'single',question:'海獭为什么对海带森林很重要？',options:['叫声让海带生长','带来养分','海獭吃海胆保护海带','海獭种海带'],answer:2,explanation:'海獭是海带森林的"守护者"！海胆吃海带根部，海獭吃海胆控制其数量——这叫"关键种"。',funFact:'🦦 海獭是少数会使用工具的海洋动物——它们用石头敲开贝壳！'},
   // 海洋生态 - 进阶
   { id:'eco_med_01',topic:'ecosystem',difficulty:1,type:'single',question:'珊瑚白化是什么？为什么会发生？',options:['水温升高→珊瑚排出共生藻→变白→持续高温则死亡','太阳晒褪色了','年纪大了变白','小鱼吃掉了颜色'],answer:0,explanation:'水温异常升高时珊瑚受胁迫排出共生虫黄藻，失去颜色变白。如果高温在几周内结束可恢复，持续则会饿死。',funFact:'🔥 2016-2017年大堡礁经历了最严重白化，约2/3珊瑚受影响！'},
   { id:'eco_med_02',topic:'ecosystem',difficulty:1,type:'single',question:'"营养级联"下面哪个例子是正确的？',options:['虎鲸吃海獭→海胆暴增→海带被吃光→生态崩溃','海鸥多吃鱼→海水变清','螃蟹多了→沙子变多','珊瑚多了→海水变冷'],answer:0,explanation:'营养级联指顶端捕食者通过捕食中层消费者间接影响底层生产者。经典例子：虎鲸→海獭→海胆→巨藻林。',funFact:'🔗 在健康生态系统中，顶级捕食者往往是最重要的"守门员"！'},
@@ -1065,17 +1103,104 @@ const questionBank = [
   { id:'eco_med_04',topic:'ecosystem',difficulty:1,type:'single',question:'为什么红树林对保护海岸线很重要？',options:['根系减弱海浪+防止侵蚀+过滤污染物','漂亮吸引游客','生产木材','把海水变淡水'],answer:0,explanation:'红树林根系像海绵吸收台风大浪能量，截留泥沙和污染物。有红树林保护的村庄在台风中受损更少。',funFact:'🌪️ 2004年印度洋海啸中，有健康红树林的海岸人员伤亡明显更低！'},
   { id:'eco_med_05',topic:'ecosystem',difficulty:1,type:'truefalse',question:'深海生态系统完全依赖来自太阳的能量。',options:['对','错'],answer:1,explanation:'错！深海热泉生态系统是例外——化能合成细菌利用地球内部化学能代替太阳能进行初级生产。',funFact:'🔋 深海热泉证明：生命可以在完全没有阳光的世界里繁荣！'},
   // 海洋生态 - 挑战
-  { id:'eco_hard_01',topic:'ecosystem',difficulty:2,type:'single',question:'为什么生物多样性对海洋生态系统的"韧性"很重要？',options:['功能冗余：一种生物受影响时其他物种可填补生态功能','稀有物种能治癌症','多样性只对陆地重要','越多种类越美观'],answer:0,explanation:'功能冗余是生态韧性的关键：存在多种执行相似功能的物种时，如果某一物种减少，其他物种可"接替"其角色。',funFact:'🧬 珊瑚礁是地球上单位面积生物多样性最高的生态系统之一！'},
+  { id:'eco_hard_01',topic:'ecosystem',difficulty:2,type:'single',question:'为什么生物多样性对海洋生态系统的"韧性"很重要？',options:['多样性只对陆地重要','稀有物种能治癌症','越多种类越美观','功能冗余：一种生物受影响时其他物种可填补生态功能'],answer:3,explanation:'功能冗余是生态韧性的关键：存在多种执行相似功能的物种时，如果某一物种减少，其他物种可"接替"其角色。',funFact:'🧬 珊瑚礁是地球上单位面积生物多样性最高的生态系统之一！'},
   { id:'eco_hard_02',topic:'ecosystem',difficulty:2,type:'single',question:'"海洋生物泵"在碳循环中起什么作用？',options:['浮游植物固定CO₂→死亡后有机碳沉降深海→长期封存碳','生物把碳从深海抽到海面','鲸鱼喷水柱有碳','机械泵让海水流动'],answer:0,explanation:'海洋生物泵是全球碳循环关键：浮游植物吸收CO₂转化为有机碳，死亡后残骸沉降到深海被封存数百年至数千年。',funFact:'❄️ "海洋雪"不是真的雪，而是持续沉降的有机物碎屑——深海生物的主要食物！'},
   { id:'eco_hard_03',topic:'ecosystem',difficulty:2,type:'single',question:'什么是"极地放大效应"？',options:['冰雪融化暴露暗色海面→吸收更多热量→加速融化（正反馈）','极地太阳特别烈','极地离太阳更近','洋流加速聚热'],answer:0,explanation:'冰雪反射太阳辐射（反照率高）。融化后暴露暗色海面吸收更多热量→进一步升温→更多融化。北极变暖速度是全球平均的2-4倍。',funFact:'🐻‍❄️ 如果夏季北极海冰完全消失，北极熊将失去捕猎海豹的平台！'},
   // 综合
-  { id:'mix_med_01',topic:'ecosystem',difficulty:1,type:'single',question:'以下哪种行为最能体现海洋保护理念？',options:['设立社区参与的海洋保护区','把所有海洋生物关进水族馆','禁止所有人去海边','把海洋生物转移到淡水'],answer:0,explanation:'最有效的保护往往是让当地社区参与进来——"社区共管"让渔民也成为保护工作的一部分。',funFact:'🤝 菲律宾阿波岛渔民自建保护区让鱼类数量在20年内增长了数倍！'},
-  { id:'mix_easy_01',topic:'biology',difficulty:0,type:'single',question:'看到小海龟孵化后爬向大海，你应该怎么做？',options:['保持安静观看，不碰不用闪光灯','抓起来扔进海里','带回家当宠物','大声欢呼'],answer:0,explanation:'小海龟需要自己完成"冲向大海"的旅程，记住出生地磁场特征成年后回来产卵。人为干扰会破坏这个过程。',funFact:'🏖️ 海龟妈妈几十年后还会回到自己出生的同一片海滩产卵！'}
+  { id:'mix_med_01',topic:'ecosystem',difficulty:1,type:'single',question:'以下哪种行为最能体现海洋保护理念？',options:['把所有海洋生物关进水族馆','把海洋生物转移到淡水','禁止所有人去海边','设立社区参与的海洋保护区'],answer:3,explanation:'最有效的保护往往是让当地社区参与进来——"社区共管"让渔民也成为保护工作的一部分。',funFact:'🤝 菲律宾阿波岛渔民自建保护区让鱼类数量在20年内增长了数倍！'},
+  { id:'mix_easy_01',topic:'biology',difficulty:0,type:'single',question:'看到小海龟孵化后爬向大海，你应该怎么做？',options:['保持安静观看，不碰不用闪光灯','抓起来扔进海里','带回家当宠物','大声欢呼'],answer:0,explanation:'小海龟需要自己完成"冲向大海"的旅程，记住出生地磁场特征成年后回来产卵。人为干扰会破坏这个过程。',funFact:'🏖️ 海龟妈妈几十年后还会回到自己出生的同一片海滩产卵！'},
+
+  // ==================== 15-18岁（学科结合/研究课题）====================
+  { id:'hs_01',topic:'geography',difficulty:3,type:'single',question:'声波在海水中的传播速度主要受哪些因素影响？',options:['和空气中一样固定','只有盐度','只有温度','温度、盐度、压力'],answer:3,explanation:'海水声速主要由温度、盐度和压力（深度）共同决定：温度每升高1℃声速约增加4-5米/秒，盐度每升高1‰约增加1.3米/秒，深度增加也提升声速。声呐探测正是利用这一点。',funFact:'🔊 海洋中存在一个"声速极小值"水层（SOFAR声道），声音在其中可以传播数千公里——鲸类就利用它远距离"打电话"。'},
+  { id:'hs_02',topic:'biology',difficulty:3,type:'single',question:'"环境DNA（eDNA）"技术是如何监测海洋生物多样性的？',options:['从海水样本中检测生物遗留的微量DNA','用声呐直接扫描鱼群','用卫星给鱼拍照','把整片海抽干调查'],answer:0,explanation:'生物在水中活动时会留下皮肤细胞、黏液、排泄物等，其中含有DNA。科学家取一杯海水，提取其中的eDNA并测序，就能判断这片海域有哪些物种——甚至不需要亲眼看到它们。这是近年海洋调查的革命性技术。',funFact:'🧬 eDNA技术曾在一杯海水里检测出数十种鱼类，比传统拖网调查更全面！'},
+  { id:'hs_03',topic:'geography',difficulty:3,type:'single',question:'科学家如何用氧同位素（δ¹⁸O）重建古代海洋温度？',options:['看化石的大小','分析沉积物中有孔虫壳体的氧同位素比例','直接测量古代海水的温度计','数珊瑚的年轮'],answer:1,explanation:'有孔虫等生物形成碳酸钙壳体时，会吸收海水中的氧。氧同位素¹⁸O和¹⁶O的比例受温度控制：温度越低，壳体中的¹⁸O越多。科学家分析海底沉积物中古老有孔虫壳体的氧同位素，就能反推数百万年前的海水温度。',funFact:'🌡️ 同位素证据揭示了冰期-间冰期的海温波动，是古气候研究的"温度计"。'},
+  { id:'hs_04',topic:'geography',difficulty:3,type:'single',question:'大洋中脊两侧的"海底磁异常条带"证明了什么？',options:['海底火山喷发','地球磁场从不改变','海底扩张和板块构造理论','海底埋着磁铁'],answer:2,explanation:'地球磁场会周期性倒转。海底火山喷出的岩浆冷却时，其中的磁性矿物会记录当时的磁场方向。大洋中脊两侧对称分布着磁异常条带，就像"海底磁带"一样记录了地磁倒转历史——这直接证明了海底在扩张、板块在移动。',funFact:'🧲 磁异常条带的发现是20世纪地球科学最伟大的证据之一，直接催生了板块构造学说！'},
+  { id:'hs_05',topic:'ecosystem',difficulty:3,type:'single',question:'海洋食物链中，能量从一级传到下一级通常保留约多少？',options:['约90%','100%','约10%','约50%'],answer:2,explanation:'能量沿食物链传递时，每一营养级只能把约10%的能量传递给上一级，其余90%消耗在呼吸、运动、散热和未被利用的部分上。这就是为什么食物链通常只有4-5级——能量不够支撑更长的链条。',funFact:'📉 这意味着生产1公斤金枪鱼，背后可能需要消耗约1万公斤的浮游植物！'},
+  { id:'hs_06',topic:'geography',difficulty:3,type:'single',question:'全球 Argo 浮标阵列主要监测海洋的什么数据？',options:['0-2000米深度的温度和盐度剖面','海面风浪高度','鱼类种群数量','海底地形地貌'],answer:0,explanation:'Argo计划在全球布设约4000个自主浮标，每个浮标每10天下潜到2000米再上浮，沿途采集温度和盐度剖面，再通过卫星传回数据。它彻底改变了海洋学——此前人类对海洋内部的温度变化几乎"是瞎的"。',funFact:'🛰️ Argo让科学家首次能实时"看见"全球海洋内部的热量变化。'},
+  { id:'hs_07',topic:'pollution',difficulty:3,type:'single',question:'"蓝碳"（Blue Carbon）指的是什么？',options:['蓝色塑料里的碳','红树林、海草床、盐沼等海岸生态系统固定的碳','深海中蓝色的石油','蓝色藻类的碳'],answer:1,explanation:'蓝碳是指红树林、海草床、盐沼等滨海生态系统捕获和封存的碳。这些生态系统虽然面积不大，但单位面积的固碳能力远超陆地森林，且碳可被封存数千年。保护蓝碳生态系统是应对气候变化的"自然解决方案"。',funFact:'🌿 红树林、海草床、盐沼的单位面积储碳量可达到热带雨林的数倍！'},
+  { id:'hs_08',topic:'biology',difficulty:3,type:'single',question:'为什么科学家对深海微生物的基因特别感兴趣？',options:['深海微生物含全新酶和代谢通路，可能产生新型抗生素和药物','深海微生物味道好','深海微生物会发光可以做灯','深海微生物能提取颜料'],answer:0,explanation:'深海极端环境（高压、低温、无光、高盐）迫使微生物进化出全新的酶和代谢通路。科学家已从中发现耐压酶、耐冷酶和具有抗菌活性的新化合物——深海是尚未开发的"药物宝库"，也是研究生命极限的窗口。',funFact:'💊 已从深海微生物中发现多种新型抗生素候选物，为对抗耐药菌带来希望。'},
+  { id:'hs_09',topic:'geography',difficulty:3,type:'single',question:'卫星高度计是如何测量海面高度的？',options:['雷达测海面到卫星的距离，结合轨道高度推算海面高度','测量海水的颜色深浅','卫星潜入海里测量','用摄像头直接看海面高低'],answer:0,explanation:'卫星高度计向下发射雷达脉冲，测量海面反射回来的时间，得到海面到卫星的距离；再结合卫星精确的轨道高度，就能算出海面高度。它可监测海流、暖水膨胀导致的海面抬升，以及厄尔尼诺现象中海面高度的东西差异。',funFact:'🛰️ 卫星高度计能测出几厘米的海面高度变化，是监测全球海平面上升的主力。'},
+  { id:'hs_10',topic:'ecosystem',difficulty:3,type:'single',question:'海洋学研究中的"温盐深仪（CTD）"主要测量什么？',options:['鱼的数量、种类、体重','海水的颜色、透明度、味道','海面风速、风向、气压','电导率、温度、深度（进而算出盐度和密度）'],answer:3,explanation:'CTD是海洋学最基础也最重要的仪器，通过测量海水的电导率（Conductivity）、温度（Temperature）和深度（Depth），即可计算出盐度和密度。所有海洋科考船的"下放CTD"都是标准动作，得到的垂直剖面是研究海洋结构和环流的基础数据。',funFact:'🌡️ 一次CTD下放就能画出从海面到海底的温度-盐度曲线，海洋学家称之为"海洋的指纹"。'},
+
+  // ==================== 海洋爱好者（潜水/国际化/保护/跨界）====================
+  { id:'lover_01',topic:'geography',difficulty:4,type:'single',question:'潜水员深潜后上升太快，为什么容易得"减压病"？',options:['血液中溶解的氮气快速释放形成气泡','喝了海水脱水','水温太低感冒了','吸入了太多氧气中毒'],answer:0,explanation:'下潜越深水压越大，人体会溶解更多氮气。如果上升太快，压力骤降，溶解的氮气来不及通过呼吸排出，就会在血液和组织中形成气泡，堵塞血管——这就是减压病，俗称"潜水夫病"。所以潜水必须缓慢上升、按规定做减压停留。',funFact:'🫧 减压病的症状从关节疼痛到瘫痪都有，严重时致命——这也是为什么潜水表会提醒你控制上升速度。'},
+  { id:'lover_02',topic:'geography',difficulty:4,type:'single',question:'深潜时出现的"氮醉"是什么感觉？',options:['类似醉酒，判断力下降、反应迟钝','变得极度清醒','皮肤刺痛发麻','一直耳鸣'],answer:0,explanation:'下潜到约30米以下，高压下溶解在血液中的氮气会麻醉中枢神经，让人产生类似醉酒的感觉——判断力下降、反应迟钝、甚至做出危险举动。深度越深越明显。这就是为什么深潜需要专业训练和同伴互相照看。',funFact:'🍸 潜水员戏称"每下潜10米，等于喝一杯马丁尼"——氮醉的"麻醉"效果随深度递增。'},
+  { id:'lover_03',topic:'pollution',difficulty:4,type:'single',question:'《联合国海洋法公约》规定的专属经济区（EEZ）宽度是多少？',options:['100海里','500海里','200海里','12海里'],answer:2,explanation:'专属经济区（EEZ）从领海基线向外延伸200海里（约370公里）。在这片海域，沿海国拥有勘探开发海洋资源的主权权利，但其他国家享有航行和飞越自由。全球约40%的海洋面积位于各国的EEZ内。',funFact:'🌐 领海是12海里，专属经济区是200海里——后者才是各国"海洋国土"的大头。'},
+  { id:'lover_04',topic:'pollution',difficulty:4,type:'single',question:'"公海"（不属于任何国家管辖的海域）约占全球海洋面积的多少？',options:['约四分之一','约三分之二','约十分之一','约二分之一'],answer:1,explanation:'公海是指各国专属经济区、领海之外的海域，约占全球海洋面积的64%（近三分之二）。公海属于全人类共有，2023年通过的《公海生物多样性协定》（BBNJ）为公海的海洋保护打开了新篇章。',funFact:'🌊 公海是全人类最后的"共有地"——2023年BBNJ协定被称为"海洋界的巴黎协定"。'},
+  { id:'lover_05',topic:'pollution',difficulty:4,type:'single',question:'海产品包装上的 MSC 蓝色标签代表什么？',options:['是最贵的进口货','是冷冻的','是野生的','来自可持续认证的渔业'],answer:3,explanation:'MSC（海洋管理委员会）蓝色标签代表该海产品来自可持续管理的渔业——捕捞量控制在可恢复范围内，且对海洋生态影响最小。购买带MSC标签的海鲜，就是在用消费选择支持可持续渔业。',funFact:'🐟 全球已有数百个渔场通过MSC认证，认准蓝标就是为海洋投一票。'},
+  { id:'lover_06',topic:'pollution',difficulty:4,type:'single',question:'"30×30"全球生物多样性目标是什么意思？',options:['减少30%的污染','保护30种濒危动物','到2030年保护30%的陆地和海洋','30个国家联合保护'],answer:2,explanation:'"30×30"是2022年联合国《昆明-蒙特利尔全球生物多样性框架》的核心目标：到2030年保护全球30%的陆地和海洋。目前全球仅约8%的海洋受到某种形式保护，全面禁捕区仅约3%，要实现目标需在几年内扩大近四倍。',funFact:'🌍 30×30被称为"给地球的救命目标"——科学家认为30%是维持生态平衡的关键阈值。'},
+  { id:'lover_07',topic:'biology',difficulty:4,type:'single',question:'自由潜水（不带气瓶）的世界纪录深度大约是多少？',options:['20米','超过100米','200米','50米'],answer:1,explanation:'自由潜水员只凭一口气下潜，世界纪录已超过120米（恒定配重带鳍下潜）。自由潜水员依靠强大的哺乳动物潜水反射——心率可降到每分钟20-30次，血液优先供给大脑和心脏。',funFact:'🫁 顶级自由潜水员一口气能在水下待超过10分钟，这几乎是人类的极限。'},
+  { id:'lover_08',topic:'pollution',difficulty:4,type:'single',question:'"海洋清理计划"（The Ocean Cleanup）用什么方式清理海洋塑料？',options:['撒化学药剂分解','用渔网拖拽','潜水员手工打捞','大型被动收集系统借助洋流拦截塑料'],answer:3,explanation:'The Ocean Cleanup研发了U型漂浮屏障系统，利用洋流自然汇集塑料，由拦网收集后再运上岸回收。它主要针对太平洋垃圾带等漂浮塑料密集区。虽然仍有争议，但它是目前规模最大的海洋塑料清理工程。',funFact:'🌊 该计划的目标是到2040年清除太平洋垃圾带中90%的漂浮塑料。'},
+  { id:'lover_09',topic:'biology',difficulty:4,type:'single',question:'印象派作曲家德彪西的名曲《大海》，是如何与海洋产生联系的？',options:['他用音符和管弦乐的色彩描绘海浪、风暴和大海的变幻','他在海底写了这首曲子','这首曲子是用鲸鱼叫声改编的','他写的是海滩度假指南'],answer:0,explanation:'德彪西的《大海》（La Mer）是印象主义音乐的代表作，用管弦乐丰富的音色和流动的旋律描绘大海的光影、波浪和风暴。艺术与海洋的跨界，让无数人在音乐中"听见"了海洋——这是海洋文化最有魅力的跨界之一。',funFact:'🎼 《大海》不是模仿海浪声，而是用音乐"画出"海的印象——这就是印象派的精髓。'},
+  { id:'lover_10',topic:'geography',difficulty:4,type:'single',question:'潜水员的气瓶里装的通常是什么？',options:['纯氧','纯净氮气','二氧化碳','压缩空气或特定配比的混合气体'],answer:3,explanation:'休闲潜水的气瓶通常装的是压缩空气（约21%氧、79%氮）。技术潜水则会根据深度使用不同配比的混合气体，如高氧（Nitrox，提高氧含量）或氦氧混合气（用于深潜，避免氮醉）。纯氧在深水中会中毒，不能直接使用。',funFact:'🤿 深潜到一定深度要"换气"——用氦气替代氮气，因为氦气不麻醉、更安全。'},
+  { id:'kb_01',topic:'biology',difficulty:0,type:'single',question:'中华白海豚成年后，身体通常是什么颜色？',options:['黑色','粉白色','蓝色','灰绿色'],answer:1,explanation:'中华白海豚刚出生时是深灰色的，随着年龄增长慢慢变白，成年后呈现独特的粉白色。它们是国家一级保护动物，珠江口是全世界最大的中华白海豚栖息地。',funFact:'🐬 全球中华白海豚只有约6000头，你在珠江口看到它们的机会比很多地方都大！'},
+  { id:'kb_02',topic:'biology',difficulty:0,type:'single',question:'传说中"美人鱼"的原型，最可能是哪种海洋动物？',options:['海豹','儒艮','海豚','海马'],answer:1,explanation:'儒艮是一种温和的海洋哺乳动物，它们有时会浮出水面、用前肢抱着幼崽哺乳，远看像人一样，古人就把它们当成了"美人鱼"。儒艮现在非常稀少，是国家一级保护动物。',funFact:'🧜 儒艮其实长得憨憨的，和童话里的美人鱼差别很大——但古人可没看清过。'},
+  { id:'kb_03',topic:'biology',difficulty:0,type:'single',question:'世界上最大的鱼是什么？',options:['鲸鲨','大白鲨','金枪鱼','蓝鲸'],answer:0,explanation:'鲸鲨是世界上最大的鱼类，可以长到12米以上！注意：蓝鲸虽然更大，但它是哺乳动物，不是鱼。鲸鲨名字里带"鲸"却是货真价实的鱼——因为它像鲸一样大。',funFact:'🦈 鲸鲨虽然巨大，但性格温顺，只吃浮游生物和小鱼，是海洋里的"温柔的巨人"。'},
+  { id:'kb_04',topic:'geography',difficulty:0,type:'single',question:'"可燃冰"最像什么东西？',options:['像冰一样却能燃烧的固体','一团火','一块煤炭','一桶汽油'],answer:0,explanation:'可燃冰是一种看起来像冰、却能点燃的固体，它是天然气和水在海底低温高压下形成的"冰"，所以叫可燃冰。它储藏在深海和冻土里，是一种巨大的未来能源。',funFact:'🔥 可燃冰点燃后真的会像蜡烛一样燃烧，边烧边化成水！'},
+  { id:'kb_05',topic:'geography',difficulty:0,type:'single',question:'科考船"向阳红10号"主要在哪个海域开展科考？',options:['南海','渤海','北冰洋','大西洋'],answer:0,explanation:'向阳红10号是中国大洋协会科考船队的功勋船，主要在南海开展科考。它搭载过"潜龙二号"深海勘查系统，还参与过火箭海上回收任务，现在也开放公民科考。',funFact:'🚢 2026年2月，向阳红10号参与了长征十号火箭的海上箭体打捞回收！'},
+  { id:'kb_06',topic:'biology',difficulty:1,type:'single',question:'"有孔虫"是一种什么生物？',options:['有碳酸钙外壳的单细胞生物','一种珊瑚','一种海草','一种小鱼'],answer:0,explanation:'有孔虫是单细胞生物，大部分比一粒沙子还小，但个个都有精巧的碳酸钙外壳。它们住在海底的泥里，是科学家研究古气候的重要"证据"。',funFact:'🔬 有孔虫的壳有纺锤形、圆形、螺旋形等各种形状，漂亮得像微观世界的珠宝。'},
+  { id:'kb_07',topic:'geography',difficulty:1,type:'single',question:'把画满图案的泡沫杯绑在仪器上下沉到深海，捞上来会怎样？',options:['没有变化','被水压压成顶针大小','变大','融化了'],answer:1,explanation:'每下潜10米就增加1个大气压，深海压力极大。泡沫杯里全是空气，会被巨大水压压缩，回来后缩成顶针大小，上面的图案也跟着缩小。这是科考船上最震撼的"压力实验"。',funFact:'🥤 一个蛋糕杯大小的泡沫杯，从200米深海回来后能缩小20倍！'},
+  { id:'kb_08',topic:'geography',difficulty:1,type:'single',question:'科学家为什么要分别在50米、100米、200米等不同深度取海水？',options:['因为好玩','仪器一次只能取一个深度','不同深度的海水性质不同，像体检要查不同项目','为了省时间'],answer:2,explanation:'海水不是一锅均匀的汤——海面的水暖暖的，200米深处又冷又黑。不同深度藏着不同的温度和化学信息，就像给大海做体检不能只测一项。所以科学家要用CTD在不同深度分别取水。',funFact:'💉 给大海"抽血化验"，就要像医生抽血一样，抽不同"部位"的水。'},
+  { id:'kb_09',topic:'geography',difficulty:1,type:'single',question:'"南海一号"沉船是什么时代的远洋商船？',options:['明朝','唐朝','清朝','南宋'],answer:3,explanation:'南海一号是南宋时期的远洋商船，满载瓷器、金银器和铜钱，2007年整体打捞出水，是水下考古史上的里程碑。它见证了海上丝绸之路的繁荣。',funFact:'🏺 南海一号上打捞出大量精美瓷器，被称为"海上敦煌"。'},
+  { id:'kb_10',topic:'biology',difficulty:1,type:'single',question:'清代描绘海洋生物的奇书《海错图》是谁画的？',options:['郦道元','李时珍','徐霞客','聂璜'],answer:3,explanation:'《海错图》是清代聂璜绘制的海洋生物图鉴，里面画了各种神奇的海中生物，有的真实、有的带着想象。它是中国最早的海洋生物图谱之一。',funFact:'🎨 聂璜画《海错图》时没有相机，全靠观察和传闻，所以里面有些"神兽"长得很奇幻！'},
+  { id:'kb_11',topic:'geography',difficulty:2,type:'single',question:'南海的四大岛群是？',options:['海南岛、台湾岛、崇明岛、舟山岛','东沙、西沙、中沙、南沙','长山、舟山、庙岛、万山','澎湖、金门、马祖、钓鱼岛'],answer:1,explanation:'南海有四大岛群：东沙群岛、西沙群岛、中沙群岛、南沙群岛。它们像一串珍珠分布在南海，是我国南海领土的重要组成部分。',funFact:'🏝️ 南海四大岛群总面积不大，但分布在辽阔的海域上，战略位置极其重要。'},
+  { id:'kb_12',topic:'geography',difficulty:2,type:'single',question:'"可燃冰"的正式学名是什么？',options:['干冰','液态甲烷','碳酸钙','天然气水合物'],answer:3,explanation:'可燃冰的正式学名叫"天然气水合物"，是天然气分子被"锁"在水分子形成的笼状结构里，在低温高压下形成的固体。1立方米可燃冰能释放出约160立方米天然气。',funFact:'🔋 可燃冰被认为是未来的清洁能源，储量可能超过煤炭和石油的总和！'},
+  { id:'kb_13',topic:'geography',difficulty:2,type:'single',question:'科考船上用来探索深海的 ROV（水下机器人）是怎样操控的？',options:['通过脐带缆与母船连接遥控','靠无线电远程控制','靠声波指挥','完全自主、无任何连接'],answer:0,explanation:'ROV（遥控潜水器）通过一根"脐带缆"与母船连接，母船通过缆线实时传输视频和指令。这根缆线既供电又传信号，所以ROV能代替人类潜入几千米深的漆黑海底。AUV（自主水下航行器）才是无缆自主航行的。',funFact:'🤖 ROV被称为"科学家的海底钢铁侠"，能在人无法到达的深度干活。'},
+  { id:'kb_14',topic:'geography',difficulty:2,type:'single',question:'科学家研究海底泥里的有孔虫化石，主要能推断出什么？',options:['古代空气的成分','古代海水温度和海平面','恐龙的外形','地震发生的时间'],answer:1,explanation:'不同形状的有孔虫生活在不同的年代和环境里。科学家通过辨认海泥中的有孔虫种类，就能推断几万年前这里的水温是几度、海平面是多高，甚至是否发生过海啸。',funFact:'🦠 有孔虫就像地球的"U盘"——记录了数百万年的气候历史。'},
+  { id:'kb_15',topic:'geography',difficulty:3,type:'single',question:'温盐深仪 CTD 中，字母"C"代表什么？',options:['钙（Calcium）','摄氏度（Celsius）','电导率（Conductivity）','碳（Carbon）'],answer:2,explanation:'CTD 是 Conductivity（电导率）、Temperature（温度）、Depth（深度）的缩写。通过测量海水的电导率可以算出盐度，再加上温度和深度，就能得到完整的海水剖面数据。',funFact:'📟 科学家把CTD得到的温度-盐度曲线称为"海洋的指纹"。'},
+  { id:'kb_16',topic:'geography',difficulty:3,type:'single',question:'科考船上"多波束声呐"的主要用途是什么？',options:['捕捞鱼群','测绘海底地形','船与船通信','测量海水温度'],answer:1,explanation:'多波束声呐向海底发射扇形的声波束，通过测量回波时间绘制海底地形图。它能覆盖很宽的海底条带，是测绘海底地形的核心设备。目前人类只测绘了约24%的海底地形。',funFact:'🗺️ 多波束声呐一次能"扫"出几十公里宽的海底地形，像给海底"扫指纹"。'},
+  { id:'kb_17',topic:'geography',difficulty:3,type:'single',question:'可燃冰（天然气水合物）形成需要的基本条件是？',options:['高温 + 低压','常温 + 常压','低温 + 高压','高温 + 高压'],answer:2,explanation:'可燃冰需要在低温、高压的环境下形成——所以它主要分布在深海海底和极地冻土中。水分子在低温高压下形成"笼子"，把天然气分子困在里面。',funFact:'❄️ 把可燃冰从海底取上来，压力一减小，它就会像雪糕一样"冒泡"并分解。'},
+  { id:'kb_18',topic:'geography',difficulty:4,type:'single',question:'潜水圈常说的"PADI"是什么？',options:['一种潜水艇','一种海洋保护区','一种深海鱼类','世界最大的潜水员认证机构'],answer:3,explanation:'PADI（国际专业潜水教练协会）是世界最大的潜水员培训和认证机构。绝大多数休闲潜水员都持有PADI证书，从入门级的"开放水域潜水员"到各种进阶专长都有分级认证。',funFact:'🤿 PADI每年在全球签发超过100万张潜水证书！'},
+  { id:'kb_19',topic:'biology',difficulty:4,type:'single',question:'中华白海豚全球现存数量大约有多少？',options:['约600头','约6000头','约60万头','约6万头'],answer:1,explanation:'中华白海豚是国家一级保护动物，全球现存仅约6000头，非常珍稀。珠江口是全世界最大的中华白海豚栖息地，在科考船上时常能见到它们粉白色的身影。',funFact:'🐬 中华白海豚被誉为"海上大熊猫"，数量比大熊猫还少！'},
+  { id:'kb_20',topic:'geography',difficulty:4,type:'single',question:'LW3-1 是我国第一个什么？',options:['深海采矿船','深海空间站','千米级深水大气田','深海核潜艇'],answer:2,explanation:'LW3-1（荔湾3-1）是我国第一个千米级深水大气田，巨大的钢铁平台矗立在1500米的深蓝海面上。科考船经过时，孩子们能亲眼看到这座"海上长城"。',funFact:'🏭 LW3-1平台矗立在1500米深的海上，是我国深海能源开发的重要里程碑。'},
+
+  // ==================== 第二批：南海生态/海错图神兽/能源/深潜 ====================
+  { id:'kb_21',topic:'biology',difficulty:0,type:'single',question:'海马宝宝是谁生出来的？',options:['海马妈妈','其他鱼帮忙','海马爸爸','海马爷爷奶奶'],answer:2,explanation:'是海马爸爸！雄海马的腹部有一个"育儿袋"，海马妈妈把卵产进去后，由爸爸负责孵化，最后把小海马"生"出来。这在动物界里非常罕见。',funFact:'🐴 海马爸爸一次能"生"出几百只小海马！'},
+  { id:'kb_22',topic:'biology',difficulty:0,type:'single',question:'砗磲是一种什么样的海洋生物？',options:['一种凶猛的大鱼','海洋里最大的双壳贝','一种会发光的珊瑚','一种有毒的海蛇'],answer:1,explanation:'砗磲是海洋中最大的双壳贝类，最大的库氏砗磲壳长可达1米多，寿命能超过100年。它和虫黄藻共生，靠阳光获取部分营养，所以被称为"光合动物"。',funFact:'🐚 砗磲的外套膜色彩艳丽，被称为"海中玫瑰"。'},
+  { id:'kb_23',topic:'biology',difficulty:0,type:'single',question:'翻车鱼最"厉害"的本事是什么？',options:['游泳速度极快','会发出歌声','能喷出毒液','一次能产约3亿枚卵'],answer:3,explanation:'翻车鱼是"产卵冠军"，一次能产约3亿枚卵，是所有脊椎动物中最多的！不过这些小卵能活到长大的极少。翻车鱼长得像被拍扁的圆盘，喜欢侧躺海面晒太阳。',funFact:'🐟 翻车鱼幼鱼只有2毫米大，长大后却能达到3米、2吨重！'},
+  { id:'kb_24',topic:'geography',difficulty:0,type:'single',question:'"可燃冰"点燃后会发生什么？',options:['什么都没有','变成石头','像冰一样融化，同时燃烧','爆炸'],answer:2,explanation:'可燃冰看起来像冰，但点燃后会像蜡烛一样燃烧，边烧边融化成水。因为它的本质是天然气被"锁"在水分子做成的笼子里，遇热分解后就释放出能燃烧的甲烷。',funFact:'🔥 可燃冰遇火会"冰火共存"——上面烧着火，下面滴着水。'},
+  { id:'kb_25',topic:'biology',difficulty:1,type:'single',question:'鹦鹉螺被称作"活化石"，它在地球上已经生活了大约多久？',options:['50万年','5亿年','5亿天','5千年'],answer:1,explanation:'鹦鹉螺已经在地球上存活了约5亿年，比恐龙还古老得多！它的螺旋壳里分很多气室，靠调节气体控制沉浮——这个原理后来启发了潜水艇的设计。',funFact:'🐚 鹦鹉螺和章鱼、乌贼是亲戚，却保留着它们没有的外壳。'},
+  { id:'kb_26',topic:'biology',difficulty:1,type:'single',question:'玳瑁是一种海龟，它最喜欢吃什么？',options:['珊瑚','海绵','小鱼','水草'],answer:1,explanation:'玳瑁是唯一以海绵为主食的海龟。它长着鹰嘴一样的喙，能伸进珊瑚礁缝隙里啄食海绵。这样做还能控制海绵过度生长，保护珊瑚礁健康，是珊瑚礁的"守护者"。',funFact:'🐢 玳瑁的背甲鳞片像宝石一样华丽，曾被大量盗采，现在是国家一级保护动物。'},
+  { id:'kb_27',topic:'biology',difficulty:1,type:'single',question:'灯笼鱼为什么能"自带小灯"？',options:['皮肤反光','吃进去的鱼会发光','身体表面涂了荧光粉','身体两侧有发光器，能自己发光'],answer:3,explanation:'灯笼鱼身体两侧排列着发光器，能自己发出光亮。深海又黑又冷，它们靠发光来吸引同伴、迷惑捕食者。灯笼鱼是海洋中数量最多的鱼类之一，是鲸鲨等大鱼的"口粮"。',funFact:'💡 灯笼鱼白天躲深水，夜晚上浮觅食，每天都在做"垂直洄游"。'},
+  { id:'kb_28',topic:'geography',difficulty:1,type:'single',question:'南海海底像一个什么形状？',options:['一个漩涡','完全平坦的大盘子','巨大的阶梯式盆地','一座尖尖的山'],answer:2,explanation:'南海海底像巨大的阶梯式游泳池：四周是浅浅的大陆架（台阶），往外是陡峭的大陆坡（大斜坡），最中间是深海的平坦"碗底"。最深处是马尼拉海沟，约5400米。',funFact:'🌊 南海面积350万平方公里，相当于16个广东省！'},
+  { id:'kb_29',topic:'geography',difficulty:1,type:'single',question:'海洋能源家族里，靠"月亮引力"发电的是哪种？',options:['潮汐能','海上风电','温差能','波浪能'],answer:0,explanation:'潮汐能利用海水涨落的水位差来发电，而潮汐的根本动力来自月球引力。涨潮时蓄水，落潮时放水发电。我国浙江江厦潮汐试验电站已运行超40年。',funFact:'🌙 月亮不仅能引发潮汐，还能"帮忙发电"！'},
+  { id:'kb_30',topic:'geography',difficulty:1,type:'single',question:'海洋里哪里的水最冷？',options:['深海海底','阳光下的水面','海边浅滩','海面'],answer:0,explanation:'南海表层水温约26-30℃，但深海只有1-4℃，又黑又冷。因为阳光照不到深海，热量传不下去，所以越深越冷。深海生物就生活在这种"冰箱"环境里。',funFact:'❄️ 南海海面能"洗温水澡"，海底却冷得像冰柜！'},
+  { id:'kb_31',topic:'geography',difficulty:2,type:'single',question:'可燃冰需要哪些条件才能形成？',options:['只要低温','低温 + 高压 + 充足的天然气','高温 + 低压','只要有天然气'],answer:1,explanation:'可燃冰的形成要"三缺一不可"：充足的天然气（甲烷）、低温（0-10℃）、高压（至少30个大气压，约水深300米以上）。深海正好同时满足低温高压，所以可燃冰大多藏在海底。',funFact:'🧊 超过20℃，可燃冰就会"解冻"分解——所以它只能待在深海的"高压冰箱"里。'},
+  { id:'kb_32',topic:'geography',difficulty:2,type:'single',question:'1立方米的可燃冰分解后，大约能释放多少天然气？',options:['10立方米','10000立方米','1-2立方米','160-180立方米'],answer:3,explanation:'1立方米可燃冰分解后能释放约164立方米甲烷气体，能量密度是煤炭的10倍！正因如此，它被称为"21世纪理想的替代能源"。',funFact:'🚗 一辆加100升天然气的车能跑300公里，换成同体积可燃冰能跑约5万公里——绕地球赤道一圈多！'},
+  { id:'kb_33',topic:'geography',difficulty:2,type:'single',question:'中国在哪一年首次成功试采可燃冰？',options:['2000年','2025年','2010年','2017年'],answer:3,explanation:'2017年，中国在南海神狐海域首次试采可燃冰成功，连续产气60天，成为全球首个在海域稳定产气的国家。2025年又实现了全球首次深海"采火"。',funFact:'🏆 2025年全运会"源火"就取自南海1522米深处的可燃冰！'},
+  { id:'kb_34',topic:'geography',difficulty:2,type:'single',question:'可燃冰虽然清洁，但开采不当有一个大风险，是什么？',options:['会冻住鱼','会爆炸伤人','甲烷泄漏——甲烷是强效温室气体','会让海水变甜'],answer:2,explanation:'可燃冰的甲烷是强效温室气体，温室效应约为二氧化碳的80倍。如果开采不当导致甲烷泄漏，会加剧全球变暖，还可能引发海底滑坡。所以安全开采是工程师的大挑战。',funFact:'⚠️ 甲烷的温室效应是CO₂的约80倍，泄漏的后果比想象中严重得多。'},
+  { id:'kb_35',topic:'geography',difficulty:2,type:'single',question:'"奋斗者"号载人潜水器2020年下潜到了多深？',options:['3000米','4500米','500米','10909米'],answer:3,explanation:'2020年，中国"奋斗者"号载人潜水器下潜到马里亚纳海沟10909米深处，创造中国载人深潜纪录。它的载人舱能承受1100个大气压，核心部件国产化率超过96.5%。',funFact:'🤿 奋斗者号下潜的10909米，比珠穆朗玛峰的高度还多出约2000米！'},
+  { id:'kb_36',topic:'geography',difficulty:2,type:'single',question:'南海最深处在哪里，大约有多深？',options:['琼州海峡，约50米','马里亚纳海沟，约11000米','马尼拉海沟，约5400米','东海，约100米'],answer:2,explanation:'南海最深处是马尼拉海沟，约5400米。马里亚纳海沟虽然在太平洋、是地球最深处（约11000米），但它不在南海。南海海底有海沟、海山、海台，地形非常复杂。',funFact:'🗺️ 南海海面面积350万平方公里，最深处马尼拉海沟约5400米。'},
+  { id:'kb_37',topic:'geography',difficulty:3,type:'single',question:'自由潜水的世界纪录大约是多深？',options:['约30米','约162米','约10米','约1000米'],answer:1,explanation:'自由潜水（不携带气瓶、只凭一口气）的世界纪录约162米。人类深潜分不同方式：自由潜水约162米，水肺潜水约330米，大气压潜水服约610米——而载人潜水器能下到万米。',funFact:'🫁 自由潜水员一口气下潜162米，靠的是哺乳动物潜水反射让心跳降到极低。'},
+  { id:'kb_38',topic:'geography',difficulty:3,type:'single',question:'人类已经探索了大约多少的洋底？',options:['约50%','约5%','约1%','约95%'],answer:1,explanation:'人类只探索了约5%的洋底，还有95%的洋底未被探索！我们对火星表面的了解，甚至超过对地球最深处的了解。深海又黑又高压，探索难度极大。',funFact:'🌍 海洋占地球表面积70.8%，但95%的洋底仍是"未知之地"。'},
+  { id:'kb_39',topic:'geography',difficulty:3,type:'single',question:'光照进入海水后，最先消失的是什么颜色的光？',options:['绿光','红光','紫光','蓝光'],answer:1,explanation:'红光最先消失（约10米深度），蓝光穿透最深（约200米）。所以在水下，红色的东西会先"变黑"。这就是为什么深海呈现蓝色，也是潜水员在水下看到的红色会变暗的原因。',funFact:'🔴 在水下约30米，红色的伤口看起来会是绿色的——因为红光被水吸收了。'},
+  { id:'kb_40',topic:'geography',difficulty:3,type:'single',question:'"彩虹鱼"号是我国研制的什么？',options:['一种观赏鱼','一个水族馆','一艘渔船','万米级载人深潜器'],answer:3,explanation:'"彩虹鱼"号是我国研制的万米级载人深潜器，由原"蛟龙"号第一副总设计师崔维成教授带领团队打造，目标是要下潜到11000米的马里亚纳海沟。它采用了"政府支持+民间投入"的创新模式。',funFact:'🏆 崔维成教授曾被《自然》杂志评为"中国十大科技之星"。'},
+  { id:'kb_41',topic:'biology',difficulty:3,type:'single',question:'中华白海豚的身体为什么会呈粉红色？',options:['被阳光晒红','皮下血管透出来显得粉红','天生就涂了粉','吃了粉色的小鱼'],answer:1,explanation:'中华白海豚不是天生粉红。它们的皮肤较薄，运动后皮下血管扩张、血液透出来，看起来就是粉红色——就像人运动后脸红一样。幼年时它们是深灰色的。',funFact:'🐬 中华白海豚被渔民称为"妈祖鱼"，是吉祥的象征。'},
+  { id:'kb_42',topic:'biology',difficulty:3,type:'single',question:'砗磲和珊瑚有什么共同点？',options:['都是哺乳动物','都是植物','都能和虫黄藻共生获取营养','都会发光'],answer:2,explanation:'砗磲和珊瑚都与虫黄藻共生！虫黄藻通过光合作用制造养分，分一部分给宿主。所以砗磲和珊瑚都部分"靠阳光吃饭"，这也是为什么它们都生活在阳光充足的浅海。',funFact:'☀️ 一个"光合动物"的称号，砗磲和珊瑚都当之无愧。'},
+  { id:'kb_43',topic:'geography',difficulty:3,type:'single',question:'海洋"公民科学"指的是什么？',options:['公民投票决定海洋政策','普通公众参与真实的海洋科考','只有科学家才能做的研究','一种潜水运动'],answer:1,explanation:'海洋公民科学让普通公众有机会参与真实的海洋科考——资源调查、生态监测、环境保护等，与科学家共同探索海洋。这既丰富了科研数据，也提升了公众的海洋保护意识。',funFact:'🔬 曾有中学生通过公民科考，做出了获全国比赛一等奖的微塑料研究课题！'},
+  { id:'kb_44',topic:'geography',difficulty:4,type:'single',question:'中国现有多少艘2000吨级以上的中大型科考船？',options:['约2艘','约6艘','约600艘','约60艘'],answer:3,explanation:'中国现有约60艘2000吨级以上的中大型科考船，涵盖极地研究（雪龙号）、综合探测、深渊探索等多种类型，支撑多学科海洋科学研究。',funFact:'🚢 从"雪龙号"到"向阳红10号"，中国科考船队越来越庞大。'},
+  { id:'kb_45',topic:'geography',difficulty:4,type:'single',question:'"向阳红10号"参与过火箭海上回收任务，它打捞的是什么？',options:['卫星','潜水艇','长征十号运载火箭的箭体','陨石'],answer:2,explanation:'2026年2月，长征十号运载火箭系统低空演示验证中，我国首次在海上实施运载火箭搜索回收，"向阳红10号"参与了箭体打捞回收任务，对推进火箭可重复使用技术意义重大。',funFact:'🚀 科考船不仅能搞科研，还能帮火箭"回家"！'},
+  { id:'kb_46',topic:'pollution',difficulty:0,type:'single',question:'全球大约有多少比例的海龟误食过塑料碎片？',options:['约0.5%','约5%','约52%','约100%'],answer:2,explanation:'研究显示，全球约52%的海龟误食过塑料碎片。尤其是爱吃水母的棱皮龟，高达54.5%的肠胃里都有塑料——因为它们把漂浮的白色塑料袋当成了水母。',funFact:'🐢 塑料袋在海里漂的样子，和海龟最爱的水母几乎一模一样。'},
+  { id:'kb_47',topic:'pollution',difficulty:1,type:'single',question:'为什么海鸟会叼塑料瓶盖喂给雏鸟？',options:['把塑料误当成了食物','塑料能当水喝','故意逗小鸟','觉得好看'],answer:0,explanation:'海鸟父母会把漂浮的塑料（瓶盖、打火机）误当成小鱼、鱿鱼，叼回去喂给雏鸟。摄影师曾在一个孤岛上发现，数十万只信天翁幼鸟因胃里塞满塑料而死亡。',funFact:'🐦 一座无人小岛上，因误食塑料死去的信天翁多达数十万只。'},
+  { id:'kb_48',topic:'geography',difficulty:4,type:'single',question:'"深蓝梦想2035"是一个什么样的计划？',options:['深海旅游计划','环球海洋科考计划','海底城市计划','海洋采矿计划'],answer:1,explanation:'"深蓝梦想2035"是一个环球海洋科考计划，分三个阶段：前三年（2025-27）启动，中四年（2028-31）展开，后三年（2032-35）完成，由"向阳红10号"执行，兼顾科学研究、产业创新和公民海洋素养提升。',funFact:'🌐 这个计划每年有100-200天的科考航次，覆盖全球海域。'},
+  { id:'kb_49',topic:'geography',difficulty:2,type:'single',question:'船舶能浮在水面上，靠的是什么力？',options:['发动机的推力','风的力量','磁力','水的浮力（排开水的向上托举力）'],answer:3,explanation:'船舶能浮在水面，靠的是浮力——水对船底向上的托举力。船排开的水越重，浮力越大。这就是阿基米德原理：当浮力等于船的重力时，船就浮起来了。',funFact:'⚓ 钢铁做的巨轮能浮起来，正是因为它的形状能排开足够多的水。'},
+  { id:'kb_50',topic:'geography',difficulty:2,type:'single',question:'螺旋桨相比早期的划桨，最大优点是什么？',options:['更便宜','更轻','更漂亮','不依赖外界，速度可控、操纵灵活'],answer:3,explanation:'螺旋桨推进不依赖外界风力或人力，能让船舶航行更稳定、速度更可控、操纵更灵活。它推动水向后，船就向前——这是现代船舶的核心动力装置。',funFact:'🚢 螺旋桨的原理，其实和风扇很像，只是风扇吹空气、螺旋桨推水。'},
 ];
 
+
 const topicNames = { biology:'海洋生物', geography:'海洋地理', pollution:'海洋环保', ecosystem:'海洋生态' };
-const diffNames = ['🌊 入门', '🐬 进阶', '🔬 挑战'];
+const diffNames = ['🌊 入门', '🐬 进阶', '🔬 挑战', '🧭 领航', '🌏 全年龄'];
 const optionLetters = ['A', 'B', 'C', 'D'];
+
+// 根据年龄段得到难度等级
+// 0=入门(6-9) 1=进阶(10-12) 2=挑战(13-14) 3=领航(15-18) 4=全年龄(海洋爱好者)
+function getDifficultyByAge(age) {
+  if (age <= 9) return 0;
+  if (age <= 12) return 1;
+  if (age <= 14) return 2;
+  if (age <= 18) return 3;
+  return 4; // 海洋爱好者
+}
 
 // ═══════════════════════════════════════
 //  KNOWLEDGE CARDS
@@ -1151,7 +1276,7 @@ function switchTab(tab) {
 // ═══════════════════════════════════════
 function selectAge(age, el) {
   state.userAge = age;
-  state.difficulty = age <= 9 ? 0 : (age <= 12 ? 1 : 2);
+  state.difficulty = getDifficultyByAge(age);
   document.querySelectorAll('.age-card').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   try { localStorage.setItem('oceanUserAge', age); } catch(e) {}
@@ -1178,7 +1303,10 @@ function resetQuizUI() {
 }
 
 function startQuiz() {
-  let pool = questionBank.filter(q => q.difficulty === state.difficulty);
+  let pool;
+
+  // 海洋爱好者（难度4）和 15-18岁（难度3）现在都有专属题库，按难度筛选
+  pool = questionBank.filter(q => q.difficulty === state.difficulty);
   if (state.selectedTopic !== 'all') pool = pool.filter(q => q.topic === state.selectedTopic);
 
   // Not enough, pull from lower difficulty
@@ -1211,8 +1339,10 @@ function renderQuestion() {
   const q = state.questions[state.currentIndex];
   const idx = state.currentIndex;
   const total = state.questions.length;
+  const pct = (idx / total) * 100;
 
-  document.getElementById('progressBar').style.width = ((idx / total) * 100) + '%';
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressOctopus').style.left = pct + '%';
   document.getElementById('progressCount').textContent = `第 ${idx + 1} / ${total} 题`;
   document.getElementById('progressTopic').textContent = `${topicNames[q.topic] || ''} · ${q.type === 'truefalse' ? '判断题' : '单选题'}`;
 
@@ -1333,6 +1463,48 @@ function showResult() {
 // ═══════════════════════════════════════
 let simAnimId = null;
 let simData = { windStrength: 3, depthLevel: 0, tideSpeed: 3 };
+
+// 各深度的代表动物（emoji 形象 + 中英文名 + 出现深度范围，依据海洋垂直分层资料）
+const depthAnimals = [
+  // 透光层 0-200m
+  { emoji:'🐠', cn:'小丑鱼', en:'Clownfish', min:0,   max:200 },
+  { emoji:'🐢', cn:'海龟', en:'Sea Turtle', min:0,   max:200 },
+  { emoji:'🐬', cn:'海豚', en:'Dolphin', min:0,   max:200 },
+  { emoji:'🪼', cn:'水母', en:'Jellyfish', min:0,   max:300 },
+  { emoji:'🐟', cn:'金枪鱼', en:'Tuna', min:0,   max:400 },
+  { emoji:'🦈', cn:'鲨鱼', en:'Shark', min:0,   max:500 },
+  { emoji:'🐡', cn:'翻车鱼', en:'Sunfish', min:0,   max:300 },
+  { emoji:'🐴', cn:'海马', en:'Seahorse', min:0,   max:100 },
+  // 中层带 200-1000m
+  { emoji:'✨', cn:'灯笼鱼', en:'Lanternfish', min:200, max:1000 },
+  { emoji:'👻', cn:'吸血乌贼', en:'Vampire Squid', min:600, max:1200 },
+  { emoji:'🦐', cn:'磷虾', en:'Krill', min:100, max:1000 },
+  { emoji:'🐋', cn:'蓝鲸', en:'Blue Whale', min:0,   max:500 },
+  // 深层带 1000-4000m
+  { emoji:'🎣', cn:'鮟鱇鱼', en:'Anglerfish', min:1000, max:4000 },
+  { emoji:'🦷', cn:'尖牙鱼', en:'Fangtooth', min:1000, max:5000 },
+  { emoji:'🐙', cn:'玻璃章鱼', en:'Glass Octopus', min:1000, max:3000 },
+  { emoji:'🐋', cn:'抹香鲸', en:'Sperm Whale', min:500, max:3000 },
+  { emoji:'🦑', cn:'大王乌贼', en:'Giant Squid', min:1000, max:4000 },
+  // 深渊带 4000-6000m
+  { emoji:'🕷️', cn:'海蜘蛛', en:'Sea Spider', min:4000, max:7000 },
+  { emoji:'🥒', cn:'海参', en:'Sea Cucumber', min:3000, max:8000 },
+  { emoji:'🦐', cn:'端足类', en:'Amphipod', min:4000, max:11000 },
+  // 超深渊带 6000m+
+  { emoji:'🐌', cn:'狮子鱼', en:'Snailfish', min:6000, max:8200 },
+  { emoji:'🪱', cn:'管蠕虫', en:'Tube Worm', min:6000, max:11000 },
+  { emoji:'🦠', cn:'深海微生物', en:'Microbe', min:6000, max:11000 },
+  { emoji:'🦐', cn:'钩虾', en:'Hadal Amphipod', min:7000, max:11000 }
+];
+
+// 深度分层（依据海洋垂直分层资料）
+const depthZones = [
+  { max:200,  name:'透光层', en:'Epipelagic / Sunlight Zone' },
+  { max:1000, name:'中层带', en:'Mesopelagic / Twilight Zone' },
+  { max:4000, name:'深层带', en:'Bathypelagic / Midnight Zone' },
+  { max:6000, name:'深渊带', en:'Abyssopelagic / Abyssal Zone' },
+  { max:11000,name:'超深渊带', en:'Hadalpelagic / Hadal Zone' }
+];
 
 function switchSim(sim, el) {
   state.activeSim = sim;
@@ -1514,72 +1686,169 @@ function drawWave(ctx, w, h) {
 }
 
 function drawDepth(ctx, w, h) {
-  const level = simData.depthLevel / 100;
-  const darken = level * 0.9 + 0.05;
+  const depth = simData.depthLevel;  // 当前深度，单位米（0-11000）
+  const level = depth / 11000;       // 0-1
 
-  const depthGrad = ctx.createLinearGradient(0, 0, 0, h);
-  depthGrad.addColorStop(0, `rgba(14, 167, 232, ${1 - darken})`);
-  depthGrad.addColorStop(0.3, `rgba(10, 100, 180, ${1 - darken * 0.7})`);
-  depthGrad.addColorStop(0.6, `rgba(5, 40, 90, ${1 - darken * 0.5})`);
-  depthGrad.addColorStop(1, `rgba(2, 10, 30, 1)`);
-  ctx.fillStyle = depthGrad; ctx.fillRect(0, 0, w, h);
+  // 背景：越深越暗，且按深度带分色
+  const bg = ctx.createLinearGradient(0, 0, 0, h);
+  // 颜色随深度变暗变黑
+  const r = Math.round(14 * (1 - level));
+  const g = Math.round(120 * (1 - level) + 20 * level);
+  const b = Math.round(200 * (1 - level) + 40 * level);
+  bg.addColorStop(0, `rgb(${Math.max(r,0)}, ${Math.max(g,20)}, ${Math.max(b,30)})`);
+  bg.addColorStop(0.5, `rgb(${Math.max(r,0)}, ${Math.max(g,10)}, ${Math.max(b,15)})`);
+  bg.addColorStop(1, `rgb(2, 8, 22)`);
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
 
-  // Light rays
+  // 光线（只在浅层明显，随深度快速消失）
+  const lightAlpha = Math.max(0, 0.18 - level * 0.18);
   for (let i = 0; i < 6; i++) {
-    const rx = w * 0.15 + i * w * 0.14;
-    const alpha = Math.max(0, 0.12 - level * 0.1);
+    const rx = w * 0.12 + i * w * 0.15;
     const rayGrad = ctx.createLinearGradient(rx, 0, rx, h * 0.5);
-    rayGrad.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+    rayGrad.addColorStop(0, `rgba(255, 255, 255, ${lightAlpha})`);
     rayGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
     ctx.fillStyle = rayGrad;
     ctx.beginPath();
-    ctx.moveTo(rx - (8 - level * 6), 0);
-    ctx.lineTo(rx + (8 - level * 6), 0);
-    ctx.lineTo(rx + 4, h * 0.45);
-    ctx.lineTo(rx - 4, h * 0.45);
+    ctx.moveTo(rx - 6, 0); ctx.lineTo(rx + 6, 0);
+    ctx.lineTo(rx + 3, h * 0.45); ctx.lineTo(rx - 3, h * 0.45);
     ctx.closePath(); ctx.fill();
   }
 
-  // Bioluminescence
-  const particles = Math.floor(level * 20);
+  // 生物发光粒子（深层才出现）
   const t = Date.now() / 1000;
-  for (let i = 0; i < particles; i++) {
-    const px = (i * w * 0.13 + t * (5 + i * 3)) % w;
-    const py = h * 0.25 + (i * h * 0.06) % (h * 0.7);
-    const a = 0.3 + Math.sin(t * 4 + i) * 0.3;
-    ctx.fillStyle = `rgba(100, 255, 218, ${a})`;
-    ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI * 2); ctx.fill();
+  if (level > 0.15) {
+    const particles = Math.floor(level * 22);
+    for (let i = 0; i < particles; i++) {
+      const px = (i * w * 0.137 + t * (6 + i * 2.7)) % w;
+      const py = h * 0.3 + (i * h * 0.05 + Math.sin(t + i) * 6) % (h * 0.65);
+      const a = 0.25 + Math.sin(t * 4 + i * 1.3) * 0.25;
+      ctx.fillStyle = `rgba(100, 255, 218, ${Math.max(0, a)})`;
+      ctx.beginPath(); ctx.arc(px, py, 1.6, 0, Math.PI * 2); ctx.fill();
+    }
   }
 
-  const depthM = Math.floor(level * 11000);
-  const zones = ['海面（透光层）','浅水层 ~50m','中层 ~200m','中层 ~500m','深海 ~800m','深海 1000m+','深渊 3000m+','超深渊 6000m+'];
-  const zi = Math.min(Math.floor(level * 7), 7);
+  // 代表动物：根据当前深度，显示该深度范围内会出现的动物，持续游动
+  const visible = depthAnimals.filter(a => depth >= a.min && depth <= a.max);
+  // 每个动物用固定"轨道"让它看起来在游动，错开分布在画面各区域
+  visible.slice(0, 6).forEach((animal, idx) => {
+    // 错开分布在画面的不同位置（上下左右错开）
+    const col = idx % 2;           // 0=偏左, 1=偏右
+    const row = Math.floor(idx / 2); // 0=上, 1=中, 2=下
+    const baseY = h * 0.28 + row * (h * 0.16);
+    const swayX = Math.sin(t * (0.12 + idx * 0.05) + idx * 1.7) * (w * 0.18);
+    const bobY = Math.sin(t * (0.15 + idx * 0.05) + idx * 2.3) * 9;
+    const x = (col === 0 ? w * 0.28 : w * 0.66) + swayX;
+    const y = baseY + bobY;
 
-  ctx.fillStyle = '#FFF'; ctx.font = '600 16px "Noto Sans SC", sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText(`${depthM}m — ${zones[zi]}`, w * 0.5, h * 0.85);
-  ctx.fillText(level > 0.5 ? '🔬 超过76%的深海生物会发光' : '☀️ 蓝光可穿透200米以上', w * 0.5, h * 0.92);
+    // emoji 形象
+    ctx.font = '36px "Noto Sans SC", "Apple Color Emoji", "Segoe UI Emoji", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(animal.emoji, x, y);
+
+    // 中英文标注
+    ctx.font = '600 13px "Noto Sans SC", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.fillText(animal.cn, x, y + 22);
+    ctx.font = '10px "Space Grotesk", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillText(animal.en, x, y + 36);
+  });
+
+  // 右侧深度刻度尺
+  drawDepthScale(ctx, w, h, depth);
+
+  // 底部深度读数
+  const zone = getDepthZone(depth);
+  ctx.fillStyle = '#FFF'; ctx.font = '700 20px "Space Grotesk", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(`${depth}m`, w * 0.5, h * 0.90);
+  ctx.font = '500 13px "Noto Sans SC", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.fillText(`${zone.name} · ${zone.en}`, w * 0.5, h * 0.90 + 22);
+}
+
+// 深度刻度尺（画在右侧）
+function drawDepthScale(ctx, w, h, depth) {
+  const scaleX = w - 18;
+  const top = h * 0.08;
+  const bottom = h * 0.82;
+  const scaleH = bottom - top;
+
+  // 背景竖线
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(scaleX, top);
+  ctx.lineTo(scaleX, bottom);
+  ctx.stroke();
+
+  // 刻度标记：0, 200, 1000, 2000, 4000, 6000, 8000, 11000
+  const marks = [0, 200, 1000, 2000, 4000, 6000, 8000, 11000];
+  const maxDepth = 11000;
+  ctx.font = '9px "Space Grotesk", sans-serif';
+  ctx.textAlign = 'left';
+  marks.forEach(m => {
+    const y = top + (m / maxDepth) * scaleH;
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(scaleX - 5, y);
+    ctx.lineTo(scaleX + 1, y);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    const label = m >= 1000 ? (m/1000)+'k' : m;
+    ctx.fillText(label, scaleX + 6, y + 3);
+  });
+
+  // 当前深度指示圆点
+  const curY = top + (depth / maxDepth) * scaleH;
+  ctx.fillStyle = '#FFC857';
+  ctx.beginPath();
+  ctx.arc(scaleX, curY, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,200,87,0.6)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(scaleX, curY, 9, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function getDepthZone(depth) {
+  for (const z of depthZones) {
+    if (depth <= z.max) return z;
+  }
+  return depthZones[depthZones.length - 1];
 }
 
 function updateSimInfo() {
   const info = {
-    tide: { title:'🌙 潮汐模拟', text:'月球引力牵引地球海水，正对和背对月球两侧同时涨潮。大多数沿海地区一天有两次涨退潮。', fact:'芬迪湾（加拿大）拥有世界最大潮差（16.3米），当地地形与月球引潮周期形成"共振"。', slider: true, sliderLabel: '播放速度', sliderVal: simData.tideSpeed, sliderFn: 'onTideSpeed' },
+    tide: { title:'🌙 潮汐模拟', text:'月球引力牵引地球海水，正对和背对月球两侧同时涨潮。大多数沿海地区一天有两次涨退潮。', fact:'芬迪湾（加拿大）拥有世界最大潮差（16.3米），当地地形与月球引潮周期形成"共振"。', slider: true, sliderLabel: '播放速度', sliderVal: simData.tideSpeed, sliderFn: 'onTideSpeed', sliderMin:1, sliderMax:10, sliderUnit:'' },
     current: { title:'🔄 洋流系统', text:'暖流（红线）将赤道热量带向极地，寒流（蓝线）将冷水送回赤道。<span class="hl">一个完整大洋环流走一圈大约需要1,000年！</span>', fact:'黑潮（Kuroshio）是太平洋西边界最强暖流之一，每秒输送约5000万立方米的水——相当于200条长江。', slider: false },
-    wave: { title:'🌊 波浪生成', text:'风吹过海面将能量传递给海水。风越大、吹的距离越长，波浪越高。', fact:'海啸波长可达数百公里，在深海中航行速度接近喷气式飞机。但在海面上你几乎感觉不到它。', slider: true, sliderLabel: '风力强度', sliderVal: simData.windStrength, sliderFn: 'onWindStrength' },
-    depth: { title:'📏 海洋深度', text:'红色光约5米消失，蓝色光能穿透到200米以上。200米以下是永恒黑暗。<span class="hl">最深处的挑战者深渊约10,994米。</span>', fact:'马里亚纳海沟最深处压力超1,000大气压。到过那里的人比登月的人还少——大约只有27人。', slider: true, sliderLabel: '下潜深度', sliderVal: simData.depthLevel, sliderFn: 'onDepthLevel' }
+    wave: { title:'🌊 波浪生成', text:'风吹过海面将能量传递给海水。风越大、吹的距离越长，波浪越高。', fact:'海啸波长可达数百公里，在深海中航行速度接近喷气式飞机。但在海面上你几乎感觉不到它。', slider: true, sliderLabel: '风力强度', sliderVal: simData.windStrength, sliderFn: 'onWindStrength', sliderMin:1, sliderMax:10, sliderUnit:' 级' },
+    depth: { title:'📏 海洋深度', text:'拖动滑块下潜，看看不同深度会遇到哪些海洋生物。<span class="hl">最深处的挑战者深渊约10,994米。</span>', fact:'马里亚纳海沟最深处压力超1,000大气压。到过那里的人比登月的人还少——大约只有27人。', slider: true, sliderLabel: '下潜深度', sliderVal: simData.depthLevel, sliderFn: 'onDepthLevel', sliderMin:0, sliderMax:11000, sliderStep:100, sliderUnit:' 米' }
   };
 
   const d = info[state.activeSim];
+  let sliderHTML = '';
+  if (d.slider) {
+    const step = d.sliderStep || 1;
+    sliderHTML = `<div class="sim-slider"><label>${d.sliderLabel}</label><input type="range" min="${d.sliderMin}" max="${d.sliderMax}" step="${step}" value="${d.sliderVal}" oninput="${d.sliderFn}(this.value)"><span class="sim-slider-value" id="simSliderValue">${d.sliderVal}${d.sliderUnit||''}</span></div>`;
+  }
   document.getElementById('simInfo').innerHTML = `
     <div class="sim-info-title">${d.title}</div>
     <div class="sim-info-text">${d.text}</div>
-    ${d.slider ? `<div class="sim-slider"><label>${d.sliderLabel}</label><input type="range" min="1" max="10" value="${d.sliderVal}" oninput="${d.sliderFn}(this.value)"></div>` : ''}
+    ${sliderHTML}
   `;
   document.getElementById('simFact').textContent = '💡 ' + d.fact;
 }
 
-function onTideSpeed(v) { simData.tideSpeed = parseInt(v); }
-function onWindStrength(v) { simData.windStrength = parseInt(v); }
-function onDepthLevel(v) { simData.depthLevel = parseInt(v); }
+function onTideSpeed(v) { simData.tideSpeed = parseInt(v); updateSliderValue(v, ''); }
+function onWindStrength(v) { simData.windStrength = parseInt(v); updateSliderValue(v, ' 级'); }
+function onDepthLevel(v) { simData.depthLevel = parseInt(v); updateSliderValue(v, ' 米'); }
+
+function updateSliderValue(v, unit) {
+  const el = document.getElementById('simSliderValue');
+  if (el) el.textContent = v + unit;
+}
 
 // ═══════════════════════════════════════
 //  KNOWLEDGE
@@ -1689,27 +1958,41 @@ function initHeroParticles() {
   canvas.height = rect.height;
 
   const ctx = canvas.getContext('2d');
-  const particles = [];
-  for (let i = 0; i < 30; i++) {
-    particles.push({
+  const bubbles = [];
+  for (let i = 0; i < 22; i++) {
+    bubbles.push({
       x: Math.random() * rect.width,
-      y: Math.random() * rect.height,
-      r: 0.5 + Math.random() * 1.5,
-      vy: 0.2 + Math.random() * 0.4,
-      alpha: 0.3 + Math.random() * 0.5,
-      phase: Math.random() * Math.PI * 2
+      y: rect.height + Math.random() * rect.height,
+      r: 2 + Math.random() * 6,
+      vy: 0.3 + Math.random() * 0.8,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: 0.01 + Math.random() * 0.02,
+      alpha: 0.25 + Math.random() * 0.35
     });
   }
 
   function anim() {
     ctx.clearRect(0, 0, rect.width, rect.height);
-    const t = Date.now() / 1000;
-    particles.forEach(p => {
-      p.y += p.vy;
-      if (p.y > rect.height + 10) { p.y = -10; p.x = Math.random() * rect.width; }
-      const a = p.alpha * (0.7 + 0.3 * Math.sin(t * 2 + p.phase));
-      ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+    bubbles.forEach(b => {
+      b.y -= b.vy;                 // 从下往上冒
+      b.wobble += b.wobbleSpeed;   // 轻微左右摆动
+      const x = b.x + Math.sin(b.wobble) * 6;
+      if (b.y < -b.r * 2) {
+        b.y = rect.height + b.r;
+        b.x = Math.random() * rect.width;
+      }
+
+      // 泡泡：圆形外圈 + 高光点
+      ctx.beginPath();
+      ctx.arc(x, b.y, b.r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${b.alpha})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.25, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${b.alpha + 0.2})`;
+      ctx.fill();
     });
     requestAnimationFrame(anim);
   }
@@ -1725,7 +2008,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedAge = parseInt(localStorage.getItem('oceanUserAge'));
     if (savedAge) {
       state.userAge = savedAge;
-      state.difficulty = savedAge <= 9 ? 0 : (savedAge <= 12 ? 1 : 2);
+      state.difficulty = getDifficultyByAge(savedAge);
       document.querySelectorAll('.age-card').forEach(c => c.classList.remove('active'));
       const target = document.querySelector(`.age-card[data-age="${savedAge}"]`);
       if (target) target.classList.add('active');
